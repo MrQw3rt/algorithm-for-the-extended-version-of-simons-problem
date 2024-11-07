@@ -1,12 +1,11 @@
 import unittest
-from functools import reduce
 from itertools import takewhile
 
 from qiskit import QuantumRegister, AncillaRegister, ClassicalRegister, QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 
 from simonalg.utils.grouptheory import generate_group_by_order
-from simonalg.utils.circuit import mcx_halfchain
+from simonalg.utils.circuit import mcx_halfchain, reverse_mcx_halfchain
 
 def run_circuit(circuit, measured_registers):
     for register in reversed(measured_registers):   # Reversed in order to preserve the register order in the output
@@ -38,6 +37,16 @@ class CustomMCXTest(unittest.TestCase):
         self.assertTrue(no_input_qubits_one or (num_input_ones == num_ancilla_ones + (2 if all_input_qubits_one else 1)))
 
 
+    def assert_correct_reverse_halfchain(self, result, bitstring):
+        self.assertIs(len(result), 1)   # The reverse halfchain circuit should not produce a superposition
+        
+        register_states = list(result.keys())[0]
+        state_in, state_an = register_states.split(' ')
+
+        self.assertEqual(state_in, bitstring)
+        self.assertEqual(state_an, '0' * len(state_an))
+
+
     def test_halfchain_with_one_input(self):
         # For size one, we expect the halfchain circuit to do nothing
         input_register = QuantumRegister(1, 'in')
@@ -49,6 +58,7 @@ class CustomMCXTest(unittest.TestCase):
 
         self.assertEqual(circuit_before, circuit)
 
+
     def test_halfchain_with_two_inputs(self):
         # For size two, we expect the halfchain circuit to do nothing
         input_register = QuantumRegister(2, 'in')
@@ -59,6 +69,7 @@ class CustomMCXTest(unittest.TestCase):
         mcx_halfchain(circuit, input_register, ancilla_register)
 
         self.assertEqual(circuit_before, circuit)
+
 
     def test_halfchain_with_three_inputs(self):
         # Size 3 is a bit special, because we need only one ancilliary qubit
@@ -87,6 +98,7 @@ class CustomMCXTest(unittest.TestCase):
             result = run_circuit(circuit, [input_register, ancilla_register])
             self.assert_correct_halfchain(result)
 
+
     def test_halfchain_with_five_inputs(self):
         for bitstring in generate_group_by_order(5):
             input_register = QuantumRegister(5, 'in')
@@ -99,6 +111,7 @@ class CustomMCXTest(unittest.TestCase):
             result = run_circuit(circuit, [input_register, ancilla_register])
             self.assert_correct_halfchain(result)
                 
+
     def test_halfchain_with_six_inputs(self):
         for bitstring in generate_group_by_order(6):
             input_register = QuantumRegister(6, 'in')
@@ -110,3 +123,87 @@ class CustomMCXTest(unittest.TestCase):
 
             result = run_circuit(circuit, [input_register, ancilla_register])
             self.assert_correct_halfchain(result)
+
+
+    def test_reverse_halfchain_with_one_input(self):
+        # For size one, we expect the halfchain circuit to do nothing
+        input_register = QuantumRegister(1, 'in')
+        ancilla_register = AncillaRegister(0, 'anc')
+        circuit = QuantumCircuit(input_register, ancilla_register)
+        
+        circuit_before = circuit.copy()
+        mcx_halfchain(circuit, input_register, ancilla_register)
+        reverse_mcx_halfchain(circuit, input_register, ancilla_register)
+
+        self.assertEqual(circuit_before, circuit)
+
+
+    def test_reverse_halfchain_with_two_inputs(self):
+        # For size two, we expect the reverse halfchain circuit to do nothing
+        input_register = QuantumRegister(2, 'in')
+        ancilla_register = AncillaRegister(0, 'anc')
+        circuit = QuantumCircuit(input_register, ancilla_register)
+        
+        circuit_before = circuit.copy()
+        mcx_halfchain(circuit, input_register, ancilla_register)
+        reverse_mcx_halfchain(circuit, input_register, ancilla_register)
+
+        self.assertEqual(circuit_before, circuit)
+
+
+
+    def test_reverse_halfchain_with_three_inputs(self):
+        # Size 3 is a bit special, because we need only one ancilliary qubit
+        for bitstring in generate_group_by_order(3):
+            input_register = QuantumRegister(3, 'in')
+            ancilla_register = AncillaRegister(1, 'anc')
+            circuit = QuantumCircuit(input_register, ancilla_register)
+            circuit.initialize(bitstring, input_register)
+
+            mcx_halfchain(circuit, input_register, ancilla_register)
+            reverse_mcx_halfchain(circuit, input_register, ancilla_register)
+
+            result = run_circuit(circuit, [input_register, ancilla_register])
+            self.assert_correct_reverse_halfchain(result, bitstring)
+
+
+    def test_reverse_halfchain_with_four_inputs(self):
+        for bitstring in generate_group_by_order(4):
+            input_register = QuantumRegister(4, 'in')
+            ancilla_register = AncillaRegister(3, 'anc')
+            circuit = QuantumCircuit(input_register, ancilla_register)
+            circuit.initialize(bitstring, input_register)
+
+            mcx_halfchain(circuit, input_register, ancilla_register)
+            reverse_mcx_halfchain(circuit, input_register, ancilla_register)
+
+            result = run_circuit(circuit, [input_register, ancilla_register])
+            self.assert_correct_reverse_halfchain(result, bitstring)
+
+
+    def test_reverse_halfchain_with_five_inputs(self):
+        for bitstring in generate_group_by_order(5):
+            input_register = QuantumRegister(5, 'in')
+            ancilla_register = AncillaRegister(4, 'anc')
+            circuit = QuantumCircuit(input_register, ancilla_register)
+            circuit.initialize(bitstring, input_register)
+
+            mcx_halfchain(circuit, input_register, ancilla_register)
+            reverse_mcx_halfchain(circuit, input_register, ancilla_register)
+
+            result = run_circuit(circuit, [input_register, ancilla_register])
+            self.assert_correct_reverse_halfchain(result, bitstring)
+
+
+    def test_reverse_halfchain_with_six_inputs(self):
+        for bitstring in generate_group_by_order(6):
+            input_register = QuantumRegister(6, 'in')
+            ancilla_register = AncillaRegister(5, 'anc')
+            circuit = QuantumCircuit(input_register, ancilla_register)
+            circuit.initialize(bitstring, input_register)
+
+            mcx_halfchain(circuit, input_register, ancilla_register)
+            reverse_mcx_halfchain(circuit, input_register, ancilla_register)
+
+            result = run_circuit(circuit, [input_register, ancilla_register])
+            self.assert_correct_reverse_halfchain(result, bitstring)
