@@ -1,24 +1,13 @@
 import unittest
 from itertools import takewhile
 
-from qiskit import QuantumRegister, AncillaRegister, ClassicalRegister, QuantumCircuit, transpile
-from qiskit_aer import AerSimulator
+from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit
+
 
 from simonalg.utils.grouptheory import generate_group_by_order
 from simonalg.utils.circuit import mcx_halfchain, reverse_mcx_halfchain, optimized_mcx
+from utils import run_circuit
 
-def run_circuit(circuit, measured_registers):
-    for register in reversed(measured_registers):   # Reversed in order to preserve the register order in the output
-        classical_register = ClassicalRegister(register.size)
-        circuit.add_register(classical_register)
-        for i in range(register.size):
-            circuit.measure(register[i], classical_register[i])
-
-    simulator = AerSimulator()
-    transpiled_circuit = transpile(circuit, simulator)
-    result = simulator.run(transpiled_circuit).result()
-
-    return result.get_counts(transpiled_circuit)
 
 class CustomMCXTest(unittest.TestCase):
     def assert_correct_halfchain(self, result):
