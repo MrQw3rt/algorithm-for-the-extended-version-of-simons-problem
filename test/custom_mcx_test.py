@@ -26,7 +26,7 @@ class CustomMCXTest(unittest.TestCase):
 
         register_states = list(result.keys())[0]
         state_in, state_an = register_states.split(' ')
-        print(state_in, state_an)
+        
         def is_one(qbit): return qbit == '1'
         num_ancilla_ones = len(list(takewhile(is_one, reversed(state_an))))
         num_input_ones = len(list(takewhile(is_one, reversed(state_in))))
@@ -100,12 +100,12 @@ class CustomMCXTest(unittest.TestCase):
         # From size 4 onwards, the halfchain circuit follows a pattern
         for bitstring in generate_group_by_order(4):
             input_register = QuantumRegister(4, 'in')
-            ancilla_register = AncillaRegister(3, 'anc')
+            ancilla_register = AncillaRegister(2, 'anc')
             circuit = QuantumCircuit(input_register, ancilla_register)
             circuit.initialize(bitstring, input_register)
 
             mcx_halfchain(circuit, input_register, ancilla_register)
-            print(circuit)
+            
             result = run_circuit(circuit, [input_register, ancilla_register])
             self.assert_correct_halfchain(result)
 
@@ -113,7 +113,7 @@ class CustomMCXTest(unittest.TestCase):
     def test_halfchain_with_five_inputs(self):
         for bitstring in generate_group_by_order(5):
             input_register = QuantumRegister(5, 'in')
-            ancilla_register = AncillaRegister(4, 'anc')
+            ancilla_register = AncillaRegister(3, 'anc')
             circuit = QuantumCircuit(input_register, ancilla_register)
             circuit.initialize(bitstring, input_register)
 
@@ -126,7 +126,7 @@ class CustomMCXTest(unittest.TestCase):
     def test_halfchain_with_six_inputs(self):
         for bitstring in generate_group_by_order(6):
             input_register = QuantumRegister(6, 'in')
-            ancilla_register = AncillaRegister(5, 'anc')
+            ancilla_register = AncillaRegister(4, 'anc')
             circuit = QuantumCircuit(input_register, ancilla_register)
             circuit.initialize(bitstring, input_register)
 
@@ -181,7 +181,7 @@ class CustomMCXTest(unittest.TestCase):
     def test_reverse_halfchain_with_four_inputs(self):
         for bitstring in generate_group_by_order(4):
             input_register = QuantumRegister(4, 'in')
-            ancilla_register = AncillaRegister(3, 'anc')
+            ancilla_register = AncillaRegister(2, 'anc')
             circuit = QuantumCircuit(input_register, ancilla_register)
             circuit.initialize(bitstring, input_register)
 
@@ -195,7 +195,7 @@ class CustomMCXTest(unittest.TestCase):
     def test_reverse_halfchain_with_five_inputs(self):
         for bitstring in generate_group_by_order(5):
             input_register = QuantumRegister(5, 'in')
-            ancilla_register = AncillaRegister(4, 'anc')
+            ancilla_register = AncillaRegister(3, 'anc')
             circuit = QuantumCircuit(input_register, ancilla_register)
             circuit.initialize(bitstring, input_register)
 
@@ -209,7 +209,7 @@ class CustomMCXTest(unittest.TestCase):
     def test_reverse_halfchain_with_six_inputs(self):
         for bitstring in generate_group_by_order(6):
             input_register = QuantumRegister(6, 'in')
-            ancilla_register = AncillaRegister(5, 'anc')
+            ancilla_register = AncillaRegister(4, 'anc')
             circuit = QuantumCircuit(input_register, ancilla_register)
             circuit.initialize(bitstring, input_register)
 
@@ -268,7 +268,7 @@ class CustomMCXTest(unittest.TestCase):
     def test_optimized_mcx_with_four_inputs(self):
         for bitstring in generate_group_by_order(4):
             input_register = QuantumRegister(4, 'in')
-            ancilla_register = AncillaRegister(3, 'anc')
+            ancilla_register = AncillaRegister(2, 'anc')
             output_register = QuantumRegister(2, 'out')
             circuit = QuantumCircuit(input_register, ancilla_register, output_register)
             circuit.initialize(bitstring, input_register)
@@ -277,5 +277,4 @@ class CustomMCXTest(unittest.TestCase):
 
             result = run_circuit(circuit, [input_register, ancilla_register, output_register])
 
-            print(circuit)
             self.assert_correct_optimized_mcx(result, bitstring)

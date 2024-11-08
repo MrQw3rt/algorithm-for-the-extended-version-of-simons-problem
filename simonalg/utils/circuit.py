@@ -22,9 +22,14 @@ def mcx_halfchain(circuit, input_register, ancilla_register):
     described in Lemma 13 of the thesis. After the halfchain circuit was applied, when we apply a CCX gate with the last input
     qubit and the last ancilliary qubit as controls, the effect is as if the CCX gate was controlled by all input qubits.
     """
-    if input_register.size <= 2:
+    input_register_size = input_register.size
+    ancilla_register_size = ancilla_register.size
+    if input_register_size <= 2:
         return
     
+    if ancilla_register_size + 2 != input_register.size:
+        raise Exception(f'Input register size {input_register_size} is not ancilla register size ({ancilla_register_size}) + 2')
+
     circuit.ccx(input_register[0], input_register[1], ancilla_register[0])
     for i in range(2, input_register.size - 1):
         circuit.ccx(input_register[i], ancilla_register[i - 2], ancilla_register[i - 1])
@@ -67,7 +72,7 @@ def optimized_mcx(circuit, input_register, ancilla_register, target_qubits):
         elif in_register_size == 2:
             circuit.ccx(input_register[0], input_register[1], target_qubit)
         else:
-            circuit.ccx(input_register[in_register_size - 1], ancilla_register[ancilla_register.size - 2], target_qubit)
+            circuit.ccx(input_register[in_register_size - 1], ancilla_register[ancilla_register.size - 1], target_qubit)
     
     circuit.barrier()
     reverse_mcx_halfchain(circuit, input_register, ancilla_register)
