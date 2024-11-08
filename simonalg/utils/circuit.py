@@ -45,3 +45,29 @@ def reverse_mcx_halfchain(circuit, input_register, ancilla_register):
     for i in range(input_register.size - 2, 1, -1):
         circuit.ccx(input_register[i], ancilla_register[i - 2], ancilla_register[i - 1])
     circuit.ccx(input_register[0], input_register[1], ancilla_register[0])
+
+
+def optimized_mcx(circuit, input_register, ancilla_register, target_qubits):
+    """
+    Parameters:
+        - circuit is the quantum circuit currently being worked on
+        - input_register is the register holding (all) control qubits for MCX
+        - ancilla_register holds ancilla qubits for MCX, all ancilla qubits are assumed to be in state |0>.
+          We assume that there is exactly one fewer ancilla qubit than input qubits.
+        - target_qubits are the the target qubits for MCX
+    Executes MCX for each target_qubit where the control qubits are all qubits in input_register. 
+    """
+    mcx_halfchain(circuit, input_register, ancilla_register)
+    circuit.barrier()
+
+    in_register_size = input_register.size
+    for target_qubit in target_qubits:
+        if in_register_size == 1:
+            circuit.cx(input_register[0], target_qubit)
+        elif in_register_size == 2:
+            circuit.ccx(input_register[0], input_register[1], target_qubit)
+        else:
+            circuit.ccx(input_register[in_register_size - 1], ancilla_register[ancilla_register.size - 2], target_qubit)
+    
+    circuit.barrier()
+    reverse_mcx_halfchain(circuit, input_register, ancilla_register)
