@@ -12,14 +12,13 @@ class RegisterNames():
 def generate_circuit_setup(n, hidden_subgroup_order):
     """
     Parameters:
-        - n is the size of the group from the current instance of Simon's problem
+        - n is the length of bitstrings of the group we are currently working on in the current instance of Simon's problem
         - hidden_subgroup_order is the size of the hidden subgroup from the current instance of Simon's problem
     Returns an empty circuit with the exact number of qubits needed for running an
     instance of Simon's problem.
-    """
-
+    """    
     input_register = QuantumRegister(n, RegisterNames.INPUT)
-    output_register_size = math.floor(math.log2((2 ** n) // hidden_subgroup_order))
+    output_register_size = math.floor(math.log2((2 ** n) // hidden_subgroup_order)) if hidden_subgroup_order < 2 ** n else 1
     output_register = QuantumRegister(output_register_size, RegisterNames.OUTPUT)
     ancilla_register = AncillaRegister(n - 2, RegisterNames.ANCILLA)
 
