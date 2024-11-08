@@ -8,7 +8,7 @@ from simonalg.utils.circuit import generate_circuit_setup
 from utils import run_circuit
 
 
-class CustomMCXTest(unittest.TestCase):
+class OracleTest(unittest.TestCase):
     def run_circuit_for_oracle(self, hidden_subgroup):
         n = len(hidden_subgroup[0])
         group = generate_group_by_order(n)
