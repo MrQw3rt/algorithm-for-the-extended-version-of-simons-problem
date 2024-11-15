@@ -1,5 +1,5 @@
 from .utils.grouptheory import generate_group_by_order, generate_cosets_for_subgroup
-from .utils.circuit import x_gate_where_bitstring_is_0, optimized_mcx, generate_circuit_setup
+from .utils.circuit import x_gate_where_bitstring_is_0, optimized_mcx
 
 
 class SimonOracle:
@@ -12,16 +12,19 @@ class SimonOracle:
         self._hidden_subgroup = hidden_subgroup
         self._hidden_subgroup_order = len(self._hidden_subgroup)
         self._n = len(hidden_subgroup[0])
+    
 
-    def generate_default_circuit(self):
+    def apply_to_circuit(self, circuit_wrapper):
         """
+        Parameters:
+             - circuit_wrapper is the circuit to which we apply (append) the oracle circuit
         Generates a circuit implementing the oracle. If f is the oracle function, |x> is an n-qubit register and |y> is an m-qubit register,
-        the circuit performs the calculation |x>|y> -> |x>|y XOR f(y)>.
+        the circuit performs the calculation |x>|y> -> |x>|y XOR f(y)>. The generated oracle circuit is appended to the circuit from circuit_wrapper.
         """
+        circuit, input_register, output_register, ancilla_register = circuit_wrapper.get()
+
         group = generate_group_by_order(self._n)
         cosets = generate_cosets_for_subgroup(group, self._hidden_subgroup)
-        
-        circuit, input_register, output_register, ancilla_register = generate_circuit_setup(self._n, len(self._hidden_subgroup))
         for c_index, coset in enumerate(cosets[1:]):
             for bitstring in coset:
                 output_value = format(c_index + 1, f'0{output_register.size}b')
@@ -34,6 +37,3 @@ class SimonOracle:
                 x_gate_where_bitstring_is_0(circuit, input_register, bitstring)
                 
                 circuit.barrier()
-
-        return circuit
-

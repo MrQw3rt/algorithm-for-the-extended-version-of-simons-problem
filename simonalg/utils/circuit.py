@@ -9,21 +9,32 @@ class RegisterNames():
     ANCILLA = 'anc'
 
 
-def generate_circuit_setup(n, hidden_subgroup_order):
-    """
-    Parameters:
-        - n is the length of bitstrings of the group we are currently working on in the current instance of Simon's problem
-        - hidden_subgroup_order is the size of the hidden subgroup from the current instance of Simon's problem
-    Returns an empty circuit with the exact number of qubits needed for running an
-    instance of Simon's problem.
-    """    
-    input_register = QuantumRegister(n, RegisterNames.INPUT)
-    output_register_size = math.floor(math.log2((2 ** n) // hidden_subgroup_order)) if hidden_subgroup_order < 2 ** n else 1
-    output_register = QuantumRegister(output_register_size, RegisterNames.OUTPUT)
-    ancilla_register = AncillaRegister(n - 2, RegisterNames.ANCILLA)
+class CircuitWrapper():
+    def __init__(self, hidden_subgroup, init_vector=None):
+        """
+        Parameters:
+            - hidden_subgroup is the hidden subgroup for the current instance of Simon's problem. The group is assumed
+              to be complete (i.e. a list containing all elements of the hidden subgroup).
+            - init_vector is optional. If present, the input_register of the generated circuit will be initialized with
+              this vector. init_vector is assumed to have exactly the same length as all elements in hidden_subgroup.
+        Returns an empty circuit with the exact number of qubits needed for running an instance of Simon's problem.
+        """ 
+        n = len(hidden_subgroup[0])
+        hidden_subgroup_order = len(hidden_subgroup)
+        
+        self.input_register = QuantumRegister(n, RegisterNames.INPUT)
+        output_register_size = math.floor(math.log2((2 ** n) // hidden_subgroup_order)) if hidden_subgroup_order < 2 ** n else 1
+        self.output_register = QuantumRegister(output_register_size, RegisterNames.OUTPUT)
+        self.ancilla_register = AncillaRegister(n - 2, RegisterNames.ANCILLA)
 
-    circuit = QuantumCircuit(input_register, output_register, ancilla_register)
-    return circuit, input_register, output_register, ancilla_register
+        self.circuit = QuantumCircuit(self.input_register, self.output_register, self.ancilla_register)
+
+        if init_vector:
+            self.circuit.initialize(init_vector, self.input_register)
+
+
+    def get(self):
+        return self.circuit, self.input_register, self.output_register, self.ancilla_register
 
 
 def x_gate_where_bitstring_is_0(circuit, register, bitstring):

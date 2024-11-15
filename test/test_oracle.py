@@ -2,7 +2,7 @@ import unittest
 
 from simonalg.oracle import SimonOracle
 from simonalg.utils.grouptheory import generate_group_by_order, generate_cosets_for_subgroup
-from simonalg.utils.circuit import generate_circuit_setup
+from simonalg.utils.circuit import CircuitWrapper
 
 
 from utils import run_circuit
@@ -16,15 +16,13 @@ class OracleTest(unittest.TestCase):
 
         results = {}
         for bitstring in group:
-            init_circuit, input_register, output_register, ancilla_register = generate_circuit_setup(n, len(hidden_subgroup))
-            init_circuit.initialize(bitstring, input_register)
+            circuit_wrapper = CircuitWrapper(hidden_subgroup, init_vector=bitstring)
+            circuit, input_register, output_register, ancilla_register = circuit_wrapper.get()
 
             oracle = SimonOracle(hidden_subgroup)
-            oracle_circuit = oracle.generate_default_circuit()
+            oracle.apply_to_circuit(circuit_wrapper)
 
-            full_circuit = init_circuit.compose(oracle_circuit)
-
-            result = run_circuit(full_circuit, [input_register, output_register, ancilla_register])
+            result = run_circuit(circuit, [input_register, output_register, ancilla_register])
         
             self.assertIs(len(result), 1)
             register_states = list(result.keys())[0]
@@ -82,8 +80,4 @@ class OracleTest(unittest.TestCase):
 
     def test_oracle_three_qubits_5(self):
         self.run_circuit_for_oracle(['000', '001', '010', '011', '100', '101', '110', '111'])
-        
-
-
-
         
