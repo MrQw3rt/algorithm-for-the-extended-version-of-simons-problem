@@ -21,7 +21,7 @@ class SimonOracle:
         Generates a circuit implementing the oracle. If f is the oracle function, |x> is an n-qubit register and |y> is an m-qubit register,
         the circuit performs the calculation |x>|y> -> |x>|y XOR f(y)>. The generated oracle circuit is appended to the circuit from circuit_wrapper.
         """
-        circuit, input_register, output_register, ancilla_register = circuit_wrapper.get()
+        circuit, input_register, output_register, _, ancilla_register = circuit_wrapper.get()
 
         group = generate_group_by_order(self._n)
         cosets = generate_cosets_for_subgroup(group, self._hidden_subgroup)

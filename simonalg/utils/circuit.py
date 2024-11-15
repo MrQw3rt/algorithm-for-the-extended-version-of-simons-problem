@@ -7,6 +7,7 @@ class RegisterNames():
     INPUT = 'in'
     OUTPUT = 'out'
     ANCILLA = 'anc'
+    BLOCKING = 'bloc'
 
 
 class CircuitWrapper():
@@ -26,15 +27,16 @@ class CircuitWrapper():
         output_register_size = math.floor(math.log2((2 ** n) // hidden_subgroup_order)) if hidden_subgroup_order < 2 ** n else 1
         self.output_register = QuantumRegister(output_register_size, RegisterNames.OUTPUT)
         self.ancilla_register = AncillaRegister(n - 2, RegisterNames.ANCILLA)
+        self.blockingclause_register = QuantumRegister(output_register_size, RegisterNames.BLOCKING)
 
-        self.circuit = QuantumCircuit(self.input_register, self.output_register, self.ancilla_register)
+        self.circuit = QuantumCircuit(self.input_register, self.output_register, self.blockingclause_register, self.ancilla_register)
 
         if init_vector:
             self.circuit.initialize(init_vector, self.input_register)
 
 
     def get(self):
-        return self.circuit, self.input_register, self.output_register, self.ancilla_register
+        return self.circuit, self.input_register, self.output_register, self.blockingclause_register, self.ancilla_register
 
 
 def x_gate_where_bitstring_is_0(circuit, register, bitstring):

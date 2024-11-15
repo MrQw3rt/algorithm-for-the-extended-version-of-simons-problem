@@ -14,13 +14,14 @@ class StandardSimonTest(unittest.TestCase):
 
         simon_circuit.generate_standard_simon_circuit()
 
-        circuit, input_register, _, ancilla_register = simon_circuit.circuit_wrapper.get()
-        result = run_circuit(circuit, [input_register, ancilla_register])
+        circuit, input_register, _, blockingclause_register, ancilla_register = simon_circuit.circuit_wrapper.get()
+        result = run_circuit(circuit, [input_register, blockingclause_register, ancilla_register])
 
         register_states = [k.split(' ') for k in result.keys()]
-        for input_register_state, ancilla_register_state in register_states:
+        for input_register_state, blockingclause_register_state, ancilla_register_state in register_states:
             self.assertTrue(is_in_orthogonal_group(input_register_state, hidden_subgroup))
             self.assertEqual(ancilla_register_state, '0' * len(ancilla_register))
+            self.assertEqual(blockingclause_register_state, '0' * len(blockingclause_register))
 
 
     def test_simonalg_two_qubits_hsgorder_1(self):
