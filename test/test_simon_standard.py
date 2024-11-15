@@ -7,7 +7,7 @@ from simonalg.utils.grouptheory import is_in_orthogonal_group
 from utils import run_circuit
 
 
-class StandardSimonTest(unittest.TestCase):
+class SimonStandardTest(unittest.TestCase):
     def run_circuit_and_assert_all_measurments_are_in_hbot(self, hidden_subgroup):
         oracle = SimonOracle(hidden_subgroup)
         simon_circuit = SimonCircuit(oracle)
