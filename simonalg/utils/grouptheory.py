@@ -55,3 +55,21 @@ def generate_cosets_for_subgroup(group, subgroup):
         for coset_member in coset:
             group_set.remove(coset_member)
     return cosets
+
+
+def bitwise_inner_product(bitstring_a, bitstring_b):
+    """
+    Parameters:
+        - bitstring_a, bitstring_b are bitstrings of equal length
+    Returns the bitwise inner product of the two inputs.
+    """
+    return sum([int(a) * int(b) for (a, b) in zip(bitstring_a, bitstring_b)]) % 2
+
+
+def is_in_orthogonal_group(bitstring, group):
+    """
+    Parameters:
+        - bitstring is the bitstring for which we want to test whether it is in the orthogonal group of group.
+        - group is assumed to be complete and all elements of group have the same length as bitstring.
+    """
+    return all([bitwise_inner_product(bitstring, g) == 0 for g in group])
