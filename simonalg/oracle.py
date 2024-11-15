@@ -3,7 +3,7 @@ from .utils.circuit import x_gate_where_bitstring_is_0, optimized_mcx, generate_
 
 
 class SimonOracle:
-    def __init__(self, hidden_subgroup, ):
+    def __init__(self, hidden_subgroup):
         """
         Parameters:
             - hidden_subgroup is a list of state vectors of the form ['000', '001']. This is supposed to be the entire hidden subgroup.
