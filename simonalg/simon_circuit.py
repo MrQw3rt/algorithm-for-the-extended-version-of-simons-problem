@@ -38,6 +38,8 @@ class SimonCircuit():
         Parameters:
             - bitstring is the bitstring we would like to remove from a superposition. bitstring is assumed to be
               non-zero and of equal length as the bitstrings of the oracle's hidden subgroup.
+            - blocking_index is a technical parameter specifying which control qubit from the blockingclause_register
+              to use.
         Modifies the circuit according to https://ieeexplore.ieee.org/abstract/document/595153, Lemma 6.
         """
         indices_where_bitstring_is_1 = list(filter(lambda i: bitstring[i] == '1', range(len(bitstring))))
