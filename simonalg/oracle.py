@@ -14,14 +14,15 @@ class SimonOracle:
         self._n = len(hidden_subgroup[0])
     
 
-    def apply_to_circuit(self, circuit_wrapper):
+    def generate_circuit(self, circuit_wrapper):
         """
         Parameters:
              - circuit_wrapper is the circuit to which we apply (append) the oracle circuit
         Generates a circuit implementing the oracle. If f is the oracle function, |x> is an n-qubit register and |y> is an m-qubit register,
         the circuit performs the calculation |x>|y> -> |x>|y XOR f(y)>. The generated oracle circuit is appended to the circuit from circuit_wrapper.
         """
-        circuit, input_register, output_register, _, ancilla_register = circuit_wrapper.get()
+        input_register, output_register, _, ancilla_register = circuit_wrapper.get_registers()
+        circuit = circuit_wrapper.generate_new_circuit()
 
         group = generate_group_by_order(self._n)
         cosets = generate_cosets_for_subgroup(group, self._hidden_subgroup)
@@ -37,3 +38,5 @@ class SimonOracle:
                 x_gate_where_bitstring_is_0(circuit, input_register, bitstring)
                 
                 circuit.barrier()
+
+        return circuit

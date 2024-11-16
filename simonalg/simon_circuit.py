@@ -1,3 +1,5 @@
+from functools import reduce
+
 from .utils.circuit import CircuitWrapper
 
 
@@ -11,15 +13,17 @@ class SimonCircuit():
         """
         Generates the quantum circuit proposed by Simon in https://epubs.siam.org/doi/abs/10.1137/S0097539796298637.
         """
-
-        circuit = self.circuit_wrapper.circuit
         input_register = self.circuit_wrapper.input_register
 
-        circuit.h(input_register)
+        first_hadamard_circuit = self.circuit_wrapper.generate_new_circuit()
+        first_hadamard_circuit.h(input_register)
 
-        self._oracle.apply_to_circuit(self.circuit_wrapper)
+        oracle_circuit = self._oracle.generate_circuit(self.circuit_wrapper)
 
-        circuit.h(input_register)
+        second_hadamard_circuit = self.circuit_wrapper.generate_new_circuit()
+        second_hadamard_circuit.h(input_register)
+
+        return first_hadamard_circuit.compose(oracle_circuit).compose(second_hadamard_circuit)
 
 
     def add_blocking_clauses_for_bitstrings(self, bitstrings):
@@ -29,11 +33,11 @@ class SimonCircuit():
               are assumed to be non-zero and of equal length as the bitstrings of the oracle's hidden subgroup.
         Modifies the circuit according to https://ieeexplore.ieee.org/abstract/document/595153, Lemma 7.
         """
-        for blocking_index, bitstring in enumerate(bitstrings):
-            self.add_blocking_clause_for_bitstring(bitstring, blocking_index)
+        blockingclause_circuits = [self.generate_blockingclause_circuit(bitstring, blocking_index) for blocking_index, bitstring in enumerate(bitstrings)]
+        return reduce(lambda a, b: a.compose(b), blockingclause_circuits, self.circuit_wrapper.generate_new_circuit())
 
 
-    def add_blocking_clause_for_bitstring(self, bitstring, blocking_index):
+    def generate_blockingclause_circuit(self, bitstring, blocking_index):
         """
         Parameters:
             - bitstring is the bitstring we would like to remove from a superposition. bitstring is assumed to be
@@ -45,7 +49,8 @@ class SimonCircuit():
         indices_where_bitstring_is_1 = list(filter(lambda i: bitstring[i] == '1', range(len(bitstring))))
         j = indices_where_bitstring_is_1[0]
 
-        circuit, input_register, _, blockingclause_register, _ = self.circuit_wrapper.get()
+        circuit = self.circuit_wrapper.generate_new_circuit()
+        input_register, _, blockingclause_register, _ = self.circuit_wrapper.get_registers()
 
         blocking_qubit = blockingclause_register[len(blockingclause_register) - 1 - blocking_index]
 
@@ -54,4 +59,6 @@ class SimonCircuit():
             circuit.cx(blocking_qubit, input_register[len(input_register) - 1 - i])
 
         circuit.h(blocking_qubit)
+
+        return circuit
  

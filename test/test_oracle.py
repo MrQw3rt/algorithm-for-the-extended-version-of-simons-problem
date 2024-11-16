@@ -16,13 +16,15 @@ class OracleTest(unittest.TestCase):
 
         results = {}
         for bitstring in group:
-            circuit_wrapper = CircuitWrapper(hidden_subgroup, init_vector=bitstring)
-            circuit, input_register, output_register, blockingclause_register, ancilla_register = circuit_wrapper.get()
+            circuit_wrapper = CircuitWrapper(hidden_subgroup)
+            input_register, output_register, blockingclause_register, ancilla_register = circuit_wrapper.get_registers()
+
+            init_circuit = circuit_wrapper.generate_new_circuit(init_vector=bitstring)
 
             oracle = SimonOracle(hidden_subgroup)
-            oracle.apply_to_circuit(circuit_wrapper)
+            oracle_circuit = oracle.generate_circuit(circuit_wrapper)
 
-            result = run_circuit(circuit, [input_register, output_register, blockingclause_register, ancilla_register])
+            result = run_circuit(init_circuit.compose(oracle_circuit), [input_register, output_register, blockingclause_register, ancilla_register])
         
             self.assertIs(len(result), 1)
             register_states = list(result.keys())[0]

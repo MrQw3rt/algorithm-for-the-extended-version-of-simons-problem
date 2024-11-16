@@ -12,13 +12,11 @@ class SimonBlockingclauseTest(unittest.TestCase):
         oracle = SimonOracle(hidden_subgroup)
         simon_circuit = SimonCircuit(oracle)
 
-        simon_circuit.generate_standard_simon_circuit()
-        simon_circuit.add_blocking_clauses_for_bitstrings(bitstrings)
+        standard_circuit = simon_circuit.generate_standard_simon_circuit()
+        blockingclauses_circuit = simon_circuit.add_blocking_clauses_for_bitstrings(bitstrings)
 
-        circuit, input_register, output_register, _, ancilla_register = simon_circuit.circuit_wrapper.get()
-        result = run_circuit(circuit, [input_register, ancilla_register])
-        print()
-        print(result)
+        input_register, _, _, ancilla_register = simon_circuit.circuit_wrapper.get_registers()
+        result = run_circuit(standard_circuit.compose(blockingclauses_circuit), [input_register, ancilla_register])
 
         # resulting bitstrings must all be in the orthogonal group of the hidden subgroup
         register_states = [k.split(' ') for k in result.keys()]

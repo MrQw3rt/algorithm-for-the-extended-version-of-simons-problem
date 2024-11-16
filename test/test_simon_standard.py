@@ -12,9 +12,8 @@ class SimonStandardTest(unittest.TestCase):
         oracle = SimonOracle(hidden_subgroup)
         simon_circuit = SimonCircuit(oracle)
 
-        simon_circuit.generate_standard_simon_circuit()
-
-        circuit, input_register, _, blockingclause_register, ancilla_register = simon_circuit.circuit_wrapper.get()
+        circuit = simon_circuit.generate_standard_simon_circuit()
+        input_register, _, blockingclause_register, ancilla_register = simon_circuit.circuit_wrapper.get_registers()
         result = run_circuit(circuit, [input_register, blockingclause_register, ancilla_register])
 
         register_states = [k.split(' ') for k in result.keys()]

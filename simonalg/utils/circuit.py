@@ -11,13 +11,11 @@ class RegisterNames():
 
 
 class CircuitWrapper():
-    def __init__(self, hidden_subgroup, init_vector=None):
+    def __init__(self, hidden_subgroup):
         """
         Parameters:
             - hidden_subgroup is the hidden subgroup for the current instance of Simon's problem. The group is assumed
               to be complete (i.e. a list containing all elements of the hidden subgroup).
-            - init_vector is optional. If present, the input_register of the generated circuit will be initialized with
-              this vector. init_vector is assumed to have exactly the same length as all elements in hidden_subgroup.
         Returns an empty circuit with the exact number of qubits needed for running an instance of Simon's problem.
         """ 
         n = len(hidden_subgroup[0])
@@ -29,14 +27,21 @@ class CircuitWrapper():
         self.ancilla_register = AncillaRegister(n - 1, RegisterNames.ANCILLA)
         self.blockingclause_register = QuantumRegister(output_register_size, RegisterNames.BLOCKING)
 
-        self.circuit = QuantumCircuit(self.input_register, self.output_register, self.blockingclause_register, self.ancilla_register)
 
+    def get_registers(self):
+        return self.input_register, self.output_register, self.blockingclause_register, self.ancilla_register
+    
+
+    def generate_new_circuit(self, init_vector=None):
+        """
+        Parameters:
+            - init_vector is optional. If present, the input_register of the generated circuit will be initialized with
+              this vector. init_vector is assumed to have exactly the same length as all elements in hidden_subgroup.
+        """
+        circuit = QuantumCircuit(self.input_register, self.output_register, self.blockingclause_register, self.ancilla_register)
         if init_vector:
-            self.circuit.initialize(init_vector, self.input_register)
-
-
-    def get(self):
-        return self.circuit, self.input_register, self.output_register, self.blockingclause_register, self.ancilla_register
+            circuit.initialize(init_vector, self.input_register)
+        return circuit
 
 
 def x_gate_where_bitstring_is_0(circuit, register, bitstring):
