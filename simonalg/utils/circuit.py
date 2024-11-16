@@ -26,7 +26,7 @@ class CircuitWrapper():
         self.input_register = QuantumRegister(n, RegisterNames.INPUT)
         output_register_size = math.floor(math.log2((2 ** n) // hidden_subgroup_order)) if hidden_subgroup_order < 2 ** n else 1
         self.output_register = QuantumRegister(output_register_size, RegisterNames.OUTPUT)
-        self.ancilla_register = AncillaRegister(n - 2, RegisterNames.ANCILLA)
+        self.ancilla_register = AncillaRegister(max(1, n - 2), RegisterNames.ANCILLA)
         self.blockingclause_register = QuantumRegister(output_register_size, RegisterNames.BLOCKING)
 
         self.circuit = QuantumCircuit(self.input_register, self.output_register, self.blockingclause_register, self.ancilla_register)
@@ -117,3 +117,21 @@ def optimized_mcx(circuit, input_register, ancilla_register, target_qubits):
     
     circuit.barrier()
     reverse_mcx_halfchain(circuit, input_register, ancilla_register)
+
+
+def conditional_phase_shift_by_index(circuit, input_register, ancilla_register, index):
+    """
+    Parameters:
+        - circuit is the quantum circuit currently being worked on
+        - input_register is the register holding inputs (e.g. for a Simon oracle)
+        - ancilla_register holds at least one qubit.
+        - index is the index of the input register, which we use to decide whether to perform the phase shift or not.
+    Implements the operater S_A from https://ieeexplore.ieee.org/abstract/document/595153, Lemma 8, where the operator
+    Chi is like Chi_i in Theorem 4.
+    """
+    control_qubit = input_register[index]
+    target_qubit = ancilla_register[0]
+    
+    circuit.cx(control_qubit, target_qubit)
+    circuit.s(target_qubit)
+    circuit.cx(control_qubit, target_qubit)
