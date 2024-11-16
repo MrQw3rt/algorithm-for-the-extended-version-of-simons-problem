@@ -133,3 +133,35 @@ def conditional_phase_shift_by_index(circuit, input_register, ancilla_register, 
     circuit.cx(control_qubit, target_qubit)
     circuit.s(target_qubit)
     circuit.cx(control_qubit, target_qubit)
+
+
+def conditional_phase_shift_by_zero_vec(circuit, input_register, ancilla_register):
+    """
+    Parameters:
+        - circuit is the quantum circuit currently being worked on.
+        - input_register is the register holding inputs (e.g. for a Simon oracle).
+        - ancilla_register holds ancilla qubits for both MCX and the conditional phase shift.
+          We must have at least as many ancilla qubits as input qubits (n-1 for MCX and one
+          for the phase shift).
+    Implements the operator S_{0} from https://ieeexplore.ieee.org/abstract/document/595153, Lemma 8. It
+    shifts the phase of the quantum state by i precisely if the input register is the all-zero vector.
+    """
+    ancilla_target = ancilla_register[len(ancilla_register) - 1]
+    in_register_size = len(input_register)
+
+    circuit.x(input_register)
+
+    if in_register_size == 1:
+        circuit.s(input_register[0])
+    elif in_register_size == 2:
+        circuit.ccx(input_register[0], input_register[1], ancilla_target)
+        circuit.s(ancilla_target)
+        circuit.ccx(input_register[0], input_register[1], ancilla_target)
+    else:
+        mcx_halfchain(circuit, input_register, ancilla_register)
+        circuit.ccx(input_register[in_register_size - 1], ancilla_register[ancilla_register.size - 2], ancilla_target)
+        circuit.s(ancilla_target)
+        circuit.ccx(input_register[in_register_size - 1], ancilla_register[ancilla_register.size - 2], ancilla_target)
+        reverse_mcx_halfchain(circuit, input_register, ancilla_register)
+
+    circuit.x(input_register)
