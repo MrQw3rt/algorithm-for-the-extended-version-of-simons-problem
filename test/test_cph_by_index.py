@@ -9,7 +9,7 @@ from simonalg.utils.circuit import conditional_phase_shift_by_index
 from utils import run_circuit_without_measurement
 
 
-class CustomMCXTest(unittest.TestCase):
+class CPHByIndexTest(unittest.TestCase):
     def run_circuit_and_assert_correct_conditional_phaseshift(self, circuit, bitstring, index):
         result = run_circuit_without_measurement(circuit).get_statevector(circuit).to_dict()
 
