@@ -13,3 +13,10 @@ def run_circuit(circuit, measured_registers):
     result = simulator.run(transpiled_circuit).result()
 
     return result.get_counts(transpiled_circuit)
+
+
+def run_circuit_without_measurement(circuit):
+    simulator = AerSimulator()
+    transpiled_circuit = transpile(circuit, simulator)
+
+    return simulator.run(transpiled_circuit).result()
