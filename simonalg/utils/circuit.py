@@ -26,7 +26,7 @@ class CircuitWrapper():
         self.input_register = QuantumRegister(n, RegisterNames.INPUT)
         output_register_size = math.floor(math.log2((2 ** n) // hidden_subgroup_order)) if hidden_subgroup_order < 2 ** n else 1
         self.output_register = QuantumRegister(output_register_size, RegisterNames.OUTPUT)
-        self.ancilla_register = AncillaRegister(max(1, n - 2), RegisterNames.ANCILLA)
+        self.ancilla_register = AncillaRegister(n - 1, RegisterNames.ANCILLA)
         self.blockingclause_register = QuantumRegister(output_register_size, RegisterNames.BLOCKING)
 
         self.circuit = QuantumCircuit(self.input_register, self.output_register, self.blockingclause_register, self.ancilla_register)
@@ -111,7 +111,7 @@ def optimized_mcx(circuit, input_register, ancilla_register, target_qubits):
         elif in_register_size == 2:
             circuit.ccx(input_register[0], input_register[1], target_qubit)
         else:
-            circuit.ccx(input_register[in_register_size - 1], ancilla_register[ancilla_register.size - 1], target_qubit)
+            circuit.ccx(input_register[in_register_size - 1], ancilla_register[in_register_size - 3], target_qubit)
     
     circuit.barrier()
     reverse_mcx_halfchain(circuit, input_register, ancilla_register)
