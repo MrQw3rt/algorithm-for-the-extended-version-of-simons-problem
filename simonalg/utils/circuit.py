@@ -1,4 +1,5 @@
 import math
+from functools import reduce
 
 from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit
 
@@ -170,3 +171,4 @@ def conditional_phase_shift_by_zero_vec(circuit, input_register, ancilla_registe
         reverse_mcx_halfchain(circuit, input_register, ancilla_register)
 
     circuit.x(input_register)
+    

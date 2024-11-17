@@ -15,15 +15,12 @@ class SimonCircuit():
         """
         input_register = self.circuit_wrapper.input_register
 
-        first_hadamard_circuit = self.circuit_wrapper.generate_new_circuit()
-        first_hadamard_circuit.h(input_register)
+        hadamard_circuit = self.circuit_wrapper.generate_new_circuit()
+        hadamard_circuit.h(input_register)
 
         oracle_circuit = self._oracle.generate_circuit(self.circuit_wrapper)
 
-        second_hadamard_circuit = self.circuit_wrapper.generate_new_circuit()
-        second_hadamard_circuit.h(input_register)
-
-        return first_hadamard_circuit.compose(oracle_circuit).compose(second_hadamard_circuit)
+        return self._compose_circuits([hadamard_circuit, oracle_circuit, hadamard_circuit])
 
 
     def add_blocking_clauses_for_bitstrings(self, bitstrings):
@@ -34,7 +31,7 @@ class SimonCircuit():
         Modifies the circuit according to https://ieeexplore.ieee.org/abstract/document/595153, Lemma 7.
         """
         blockingclause_circuits = [self.generate_blockingclause_circuit(bitstring, blocking_index) for blocking_index, bitstring in enumerate(bitstrings)]
-        return reduce(lambda a, b: a.compose(b), blockingclause_circuits, self.circuit_wrapper.generate_new_circuit())
+        return self._compose_circuits(blockingclause_circuits)
 
 
     def generate_blockingclause_circuit(self, bitstring, blocking_index):
@@ -62,3 +59,12 @@ class SimonCircuit():
 
         return circuit
  
+
+    def _compose_circuits(self, circuits):
+        """
+        Parameters:
+            - circuits is a list of circuits which we want to compose.
+        Returns a quantum circuit that is composed of the quantum circuits in circuits. The circuits get
+        concatenated in the order in which they are inserted in the list.
+        """
+        return reduce(lambda a,b: a.compose(b), circuits, self.circuit_wrapper.generate_new_circuit())
