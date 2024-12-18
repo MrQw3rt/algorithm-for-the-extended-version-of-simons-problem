@@ -108,7 +108,7 @@ def optimized_mcx(circuit, input_register, ancilla_register, target_qubits):
     Executes MCX for each target_qubit where the control qubits are all qubits in input_register. 
     """
     mcx_halfchain(circuit, input_register, ancilla_register)
-    circuit.barrier()
+    #circuit.barrier()
 
     in_register_size = input_register.size
     for target_qubit in target_qubits:
@@ -119,7 +119,7 @@ def optimized_mcx(circuit, input_register, ancilla_register, target_qubits):
         else:
             circuit.ccx(input_register[in_register_size - 1], ancilla_register[in_register_size - 3], target_qubit)
     
-    circuit.barrier()
+    #circuit.barrier()
     reverse_mcx_halfchain(circuit, input_register, ancilla_register)
 
 
@@ -171,4 +171,3 @@ def conditional_phase_shift_by_zero_vec(circuit, input_register, ancilla_registe
         reverse_mcx_halfchain(circuit, input_register, ancilla_register)
 
     circuit.x(input_register)
-    
