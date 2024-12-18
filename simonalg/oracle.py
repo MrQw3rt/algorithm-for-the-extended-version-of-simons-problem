@@ -12,7 +12,7 @@ class SimonOracle:
         self._hidden_subgroup = hidden_subgroup
         self._hidden_subgroup_order = len(self._hidden_subgroup)
         self._n = len(hidden_subgroup[0])
-    
+        
 
     def generate_circuit(self, circuit_wrapper):
         """
