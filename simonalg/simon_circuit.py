@@ -1,6 +1,6 @@
 from functools import reduce
 
-from .utils.circuit import CircuitWrapper, conditional_phase_shift_by_zero_vec
+from .utils.circuit import CircuitWrapper, conditional_phase_shift_by_zero_vec, conditional_phase_shift_by_zero_vec_entire_register
 from qiskit.quantum_info import Operator
 from qiskit import QuantumRegister
 
@@ -69,14 +69,11 @@ class SimonCircuit():
         forward_circuit = self.circuit_wrapper.generate_new_circuit()
         input_register, output_register, blockingclause_register, ancilla_register = self.circuit_wrapper.get_registers()
 
-        forward_circuit.h(input_register)
-        forward_circuit.cx(input_register[1], output_register[0])
-        forward_circuit.h(input_register)
-        #forward_circuit.h(input_register[1])
-        #forward_circuit.h(output_register[0])
-        #forward_circuit.ccx(input_register[1], output_register[0], ancilla_register[0])
-        #forward_circuit.z(ancilla_register[0])
-        #forward_circuit.ccx(input_register[1], output_register[0], ancilla_register[0])
+        forward_circuit.h(input_register[1])
+        forward_circuit.h(output_register[0])
+        forward_circuit.ccx(input_register[1], output_register[0], ancilla_register[0])
+        forward_circuit.z(ancilla_register[0])
+        forward_circuit.ccx(input_register[1], output_register[0], ancilla_register[0])
 
         return forward_circuit
 
@@ -166,16 +163,6 @@ class SimonCircuit():
         second_forward_circuit = self.generate_standard_simon_circuit()
         second_forward_circuit.save_statevector(label='5_final_forward')
          
-        """output_register = self.circuit_wrapper.output_register
-        ancilla_register = self.circuit_wrapper.ancilla_register
-        forward_circuit = self.circuit_wrapper.generate_new_circuit()
-        
-        forward_circuit.h(input_register[1])
-        forward_circuit.h(output_register[0])
-        forward_circuit.ccx(input_register[1], output_register[0], ancilla_register[0])
-        forward_circuit.z(ancilla_register[0])
-        forward_circuit.ccx(input_register[1], output_register[0], ancilla_register[0]) """
-
         return self._compose_circuits([
             first_forward_circuit,
             phaseshift_by_index_circuit,
@@ -218,8 +205,20 @@ class SimonCircuit():
         the all-zero bitstring.
         """
         circuit = self.circuit_wrapper.generate_new_circuit()
-        input_register, _, _, ancilla_register = self.circuit_wrapper.get_registers()
-        conditional_phase_shift_by_zero_vec(circuit, input_register, ancilla_register)
+        input_register, output_register, blockingclause_register, ancilla_register = self.circuit_wrapper.get_registers()
+        
+        """ circuit.x(input_register)
+        circuit.x(output_register)
+        circuit.ccx(input_register[0], input_register[1], blockingclause_register[0])
+        circuit.ccx(output_register[0], blockingclause_register[0], ancilla_register[0])
+        circuit.s(ancilla_register[0])
+        circuit.ccx(output_register[0], blockingclause_register[0], ancilla_register[0])
+        circuit.ccx(input_register[0], input_register[1], blockingclause_register[0])
+        circuit.x(output_register)
+        circuit.x(input_register) """
+        
+        working_registers = [input_register, output_register, blockingclause_register]
+        conditional_phase_shift_by_zero_vec_entire_register(circuit, working_registers, ancilla_register)
 
         return circuit
 

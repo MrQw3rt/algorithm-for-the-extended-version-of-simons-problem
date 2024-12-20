@@ -22,11 +22,17 @@ class CircuitWrapper():
         n = len(hidden_subgroup[0])
         hidden_subgroup_order = len(hidden_subgroup)
         
+        input_register_size = n
         self.input_register = QuantumRegister(n, RegisterNames.INPUT)
+
         output_register_size = math.floor(math.log2((2 ** n) // hidden_subgroup_order)) if hidden_subgroup_order < 2 ** n else 1
         self.output_register = QuantumRegister(output_register_size, RegisterNames.OUTPUT)
-        self.ancilla_register = AncillaRegister(n - 1, RegisterNames.ANCILLA)
-        self.blockingclause_register = QuantumRegister(output_register_size, RegisterNames.BLOCKING)
+
+        blockingclaue_register_size = output_register_size
+        self.blockingclause_register = QuantumRegister(blockingclaue_register_size, RegisterNames.BLOCKING)
+
+        ancilla_register_size = input_register_size + output_register_size + blockingclaue_register_size - 1
+        self.ancilla_register = AncillaRegister(ancilla_register_size, RegisterNames.ANCILLA)
 
 
     def get_registers(self):
@@ -68,16 +74,16 @@ def mcx_halfchain(circuit, input_register, ancilla_register):
     described in Lemma 13 of the thesis. After the halfchain circuit was applied, when we apply a CCX gate with the last input
     qubit and the last ancilliary qubit as controls, the effect is as if the CCX gate was controlled by all input qubits.
     """
-    input_register_size = input_register.size
-    ancilla_register_size = ancilla_register.size
+    input_register_size = len(input_register)
+    ancilla_register_size =len(ancilla_register)
     if input_register_size <= 2:
         return
     
-    if ancilla_register_size + 2 < input_register.size:
+    if ancilla_register_size + 2 < input_register_size:
         raise Exception(f'Ancilla register is too small: an input register of size {input_register_size} requires at least {input_register_size} + 2 ancilla qubits!')
 
     circuit.ccx(input_register[0], input_register[1], ancilla_register[0])
-    for i in range(2, input_register.size - 1):
+    for i in range(2, input_register_size - 1):
         circuit.ccx(input_register[i], ancilla_register[i - 2], ancilla_register[i - 1])
 
 
@@ -89,10 +95,11 @@ def reverse_mcx_halfchain(circuit, input_register, ancilla_register):
         - ancilla_register holds ancilla qubits for MCX, it is assumed that we have at least two fewer ancilla qubits than input qubits.
     Reverses the effects of the mcx_halfchain circuit.
     """
-    if input_register.size <= 2:
+    input_register_size = len(input_register)
+    if input_register_size <= 2:
         return
     
-    for i in range(input_register.size - 2, 1, -1):
+    for i in range(input_register_size - 2, 1, -1):
         circuit.ccx(input_register[i], ancilla_register[i - 2], ancilla_register[i - 1])
     circuit.ccx(input_register[0], input_register[1], ancilla_register[0])
 
@@ -171,3 +178,14 @@ def conditional_phase_shift_by_zero_vec(circuit, input_register, ancilla_registe
         reverse_mcx_halfchain(circuit, input_register, ancilla_register)
 
     circuit.x(input_register)
+
+
+def conditional_phase_shift_by_zero_vec_entire_register(circuit, registers, ancilla_register):
+
+    def append_qubits(register, accumulator_list):
+        for qubit in register:
+            accumulator_list.append(qubit)
+        return accumulator_list
+    virtual_input_register = list(reduce(lambda a,b: append_qubits(b, a), registers, []))
+
+    conditional_phase_shift_by_zero_vec(circuit, virtual_input_register, ancilla_register)
