@@ -31,5 +31,10 @@ Note that the above command installs `qiskit` and `qiskit-aer` system-wide!
 
 In the project root, run
 ```
-$ python3 -m unittest discover -v -s ./test
+(.venv) $ python3 -m unittest discover -v -s ./test
+```
+
+You can run the more interesting test cases for the remove-all-zero operator with
+```
+(.venv) $ python3 -m unittest discover -s ./test -p test_simon_remove_all_zero.py
 ```
