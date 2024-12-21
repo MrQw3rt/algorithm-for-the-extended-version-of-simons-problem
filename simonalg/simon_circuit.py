@@ -194,7 +194,6 @@ class SimonCircuit():
         circuit = self.circuit_wrapper.generate_new_circuit()
         input_register, _, _, _ = self.circuit_wrapper.get_registers()
         circuit.s(input_register[index])
-        #conditional_phase_shift_by_index(circuit, input_register, ancilla_register, index)
 
         return circuit
 
@@ -206,16 +205,6 @@ class SimonCircuit():
         """
         circuit = self.circuit_wrapper.generate_new_circuit()
         input_register, output_register, blockingclause_register, ancilla_register = self.circuit_wrapper.get_registers()
-        
-        """ circuit.x(input_register)
-        circuit.x(output_register)
-        circuit.ccx(input_register[0], input_register[1], blockingclause_register[0])
-        circuit.ccx(output_register[0], blockingclause_register[0], ancilla_register[0])
-        circuit.s(ancilla_register[0])
-        circuit.ccx(output_register[0], blockingclause_register[0], ancilla_register[0])
-        circuit.ccx(input_register[0], input_register[1], blockingclause_register[0])
-        circuit.x(output_register)
-        circuit.x(input_register) """
         
         working_registers = [input_register, output_register, blockingclause_register]
         conditional_phase_shift_by_zero_vec_entire_register(circuit, working_registers, ancilla_register)
