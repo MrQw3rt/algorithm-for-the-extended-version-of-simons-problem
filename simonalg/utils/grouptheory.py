@@ -73,3 +73,15 @@ def is_in_orthogonal_group(bitstring, group):
         - group is assumed to be complete and all elements of group have the same length as bitstring.
     """
     return all([bitwise_inner_product(bitstring, g) == 0 for g in group])
+
+
+def generate_orthogonal_group(group, subgroup):
+    """
+    Parameters:
+        - group is the complete group of bitstrings of length n.
+        - subgroup is some complete subgroup.
+    Returns the orthogonal group to subgroup as a list.
+    """
+    orthogonal_group = list(filter(lambda bitstring: is_in_orthogonal_group(bitstring, subgroup), group))
+    orthogonal_group.sort()
+    return orthogonal_group
