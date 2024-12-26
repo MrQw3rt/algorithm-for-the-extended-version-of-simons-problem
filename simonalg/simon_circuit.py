@@ -65,6 +65,7 @@ class SimonCircuit():
         return circuit
     
 
+    # TODO unused right now
     def generate_demo_forward_circuit(self):
         forward_circuit = self.circuit_wrapper.generate_new_circuit()
         input_register, output_register, blockingclause_register, ancilla_register = self.circuit_wrapper.get_registers()
