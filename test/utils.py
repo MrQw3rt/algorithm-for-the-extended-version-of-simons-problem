@@ -77,7 +77,8 @@ def construct_and_run_extended_simon_circuit(hidden_subgroup, index, orthogonal_
     log_parameters([
         ('Running circuit for hidden subgroup ', hidden_subgroup),
         ('Orthogonal group is ', orthogonal_subgroup),
-        ('Index is ', index)
+        ('Index is ', index),
+        ('Blockingclauses are ', blockingclause_bitstrings)
     ] + ([('Generated Circuit\n', rmz_circuit)] if log_circuit else []))
 
     result = run_circuit(rmz_circuit, [input_register])
@@ -111,7 +112,7 @@ def construct_extended_simon_circuit_and_run_for_every_possible_index(hidden_sub
         indices_that_can_be_1_after_bitstrings = range(n)
 
     for index in indices_that_can_be_1_after_bitstrings:
-        measurements = construct_and_run_extended_simon_circuit(hidden_subgroup, index, orthogonal_subgroup, blockingclause_bitstrings=blockingclause_bitstrings)
+        measurements = construct_and_run_extended_simon_circuit(hidden_subgroup, index, orthogonal_subgroup, blockingclause_bitstrings=blockingclause_bitstrings, log_circuit=log_circuit_and_statevector)
         if log_circuit_and_statevector:
             sv_circuit, sv_input_register, sv_output_register = construct_extended_simon_circuit(hidden_subgroup, index)
             result_sv = run_circuit_without_measurement(sv_circuit).data(0)
