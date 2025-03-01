@@ -1,5 +1,5 @@
-from .oracle import SimonOracle
+from .oracle import DefaultOracle
 
-oracle = SimonOracle(['000'])
+oracle = DefaultOracle(['000'])
 circuit = oracle.generate_default_circuit()
 print(circuit)

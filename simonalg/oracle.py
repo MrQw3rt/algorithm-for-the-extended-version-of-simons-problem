@@ -2,7 +2,7 @@ from .utils.grouptheory import generate_group_by_order, generate_cosets_for_subg
 from .utils.circuit import x_gate_where_bitstring_is_0, optimized_mcx
 
 
-class SimonOracle:
+class DefaultOracle:
     def __init__(self, hidden_subgroup):
         """
         Parameters:

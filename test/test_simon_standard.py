@@ -1,6 +1,6 @@
 import unittest
 
-from simonalg.oracle import SimonOracle
+from simonalg.oracle import DefaultOracle
 from simonalg.simon_circuit import SimonCircuit
 from simonalg.utils.grouptheory import is_in_orthogonal_group
 
@@ -9,7 +9,7 @@ from utils import run_circuit
 
 class SimonStandardTest(unittest.TestCase):
     def run_circuit_and_assert_all_measurments_are_in_hbot(self, hidden_subgroup):
-        oracle = SimonOracle(hidden_subgroup)
+        oracle = DefaultOracle(hidden_subgroup)
         simon_circuit = SimonCircuit(oracle)
 
         circuit = simon_circuit.generate_standard_simon_circuit()
@@ -24,7 +24,7 @@ class SimonStandardTest(unittest.TestCase):
 
 
     def run_circuit_and_assert_it_is_its_own_inverse(self, hidden_subgroup):
-        oracle = SimonOracle(hidden_subgroup)
+        oracle = DefaultOracle(hidden_subgroup)
         simon_circuit = SimonCircuit(oracle)
 
         circuit = simon_circuit.generate_standard_simon_circuit()

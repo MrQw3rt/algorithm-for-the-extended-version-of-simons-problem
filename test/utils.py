@@ -5,7 +5,7 @@ from qiskit_aer import AerSimulator
 import unittest
 from functools import reduce
 
-from simonalg.oracle import SimonOracle
+from simonalg.oracle import DefaultOracle
 from simonalg.simon_circuit import SimonCircuit
 from simonalg.utils.grouptheory import generate_group_by_order, generate_orthogonal_group, is_in_orthogonal_group
 
@@ -64,7 +64,7 @@ def run_circuit_without_measurement(circuit):
 
 
 def construct_extended_simon_circuit(hidden_subgroup, index, blockingclause_bitstrings=[]):
-    oracle = SimonOracle(hidden_subgroup)
+    oracle = DefaultOracle(hidden_subgroup)
     simon_circuit = SimonCircuit(oracle)
 
     input_register, output_register, _, _ = simon_circuit.circuit_wrapper.get_registers()

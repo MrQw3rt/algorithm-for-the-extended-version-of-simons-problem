@@ -15,7 +15,7 @@ To install the necessary packages, run
 ```
 You can always exit the virtual environment with 
 ```
-$ deactivate
+(.venv) $ deactivate
 ```
 
 ### Using global Environment (Not Recommended)

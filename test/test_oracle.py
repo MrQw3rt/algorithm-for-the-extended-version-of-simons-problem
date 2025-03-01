@@ -1,6 +1,6 @@
 import unittest
 
-from simonalg.oracle import SimonOracle
+from simonalg.oracle import DefaultOracle
 from simonalg.utils.grouptheory import generate_group_by_order, generate_cosets_for_subgroup
 from simonalg.utils.circuit import CircuitWrapper
 
@@ -21,7 +21,7 @@ class OracleTest(unittest.TestCase):
 
             init_circuit = circuit_wrapper.generate_new_circuit(init_vector=bitstring)
 
-            oracle = SimonOracle(hidden_subgroup)
+            oracle = DefaultOracle(hidden_subgroup)
             oracle_circuit = oracle.generate_circuit(circuit_wrapper)
 
             result = run_circuit(init_circuit.compose(oracle_circuit), [input_register, output_register, blockingclause_register, ancilla_register])

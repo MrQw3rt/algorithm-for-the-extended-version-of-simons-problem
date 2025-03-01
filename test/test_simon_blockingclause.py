@@ -1,6 +1,6 @@
 import unittest
 
-from simonalg.oracle import SimonOracle
+from simonalg.oracle import DefaultOracle
 from simonalg.simon_circuit import SimonCircuit
 from simonalg.utils.grouptheory import is_in_orthogonal_group
 
@@ -9,7 +9,7 @@ from utils import run_circuit
 
 class SimonBlockingclauseTest(unittest.TestCase):
     def run_circuit_with_blockingclause_and_assert_correct_behaviour(self, hidden_subgroup, bitstrings):
-        oracle = SimonOracle(hidden_subgroup)
+        oracle = DefaultOracle(hidden_subgroup)
         simon_circuit = SimonCircuit(oracle)
 
         standard_circuit = simon_circuit.generate_standard_simon_circuit()
