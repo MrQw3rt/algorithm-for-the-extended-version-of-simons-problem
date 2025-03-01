@@ -12,11 +12,16 @@ class RegisterNames():
 
 
 class CircuitWrapper():
-    def __init__(self, hidden_subgroup):
+    def __init__(self, hidden_subgroup, custom_output_register_size=None, custom_ancilla_register_size=None):
         """
         Parameters:
             - hidden_subgroup is the hidden subgroup for the current instance of Simon's problem. The group is assumed
               to be complete (i.e. a list containing all elements of the hidden subgroup).
+            - custom_output_register_size should be used for custom oracle implementations where the oracle's output
+              needs more qubits than the strict lower bound log(2^n)//hidden_subgroup_order.
+            - custom_ancilla_register_size should be used for custom oracle implementations that need more ancilla
+              qubits than the strict lower bound (total_number_of_qubits - 1) needed for the multi-controlled CNOT
+              gates.
         Returns an empty circuit with the exact number of qubits needed for running an instance of Simon's problem.
         """ 
         n = len(hidden_subgroup[0])
@@ -25,13 +30,15 @@ class CircuitWrapper():
         input_register_size = n
         self.input_register = QuantumRegister(n, RegisterNames.INPUT)
 
-        output_register_size = math.floor(math.log2((2 ** n) // hidden_subgroup_order)) if hidden_subgroup_order < 2 ** n else 1
+        default_output_register_size = math.floor(math.log2((2 ** n) // hidden_subgroup_order)) if hidden_subgroup_order < 2 ** n else 1
+        output_register_size = custom_output_register_size or default_output_register_size
         self.output_register = QuantumRegister(output_register_size, RegisterNames.OUTPUT)
 
-        blockingclaue_register_size = output_register_size
+        blockingclaue_register_size = default_output_register_size
         self.blockingclause_register = QuantumRegister(blockingclaue_register_size, RegisterNames.BLOCKING)
 
-        ancilla_register_size = input_register_size + output_register_size + blockingclaue_register_size - 1
+        default_ancilla_register_size = input_register_size + output_register_size + blockingclaue_register_size - 1
+        ancilla_register_size = custom_ancilla_register_size or default_ancilla_register_size
         self.ancilla_register = AncillaRegister(ancilla_register_size, RegisterNames.ANCILLA)
 
 
