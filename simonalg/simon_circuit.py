@@ -6,9 +6,9 @@ from qiskit import QuantumRegister
 
 
 class SimonCircuit():
-    def __init__(self, oracle):
+    def __init__(self, oracle, custom_output_register_size=None, custom_ancilla_register_size=None):
         self._oracle = oracle
-        self.circuit_wrapper = CircuitWrapper(self._oracle._hidden_subgroup)
+        self.circuit_wrapper = CircuitWrapper(self._oracle._hidden_subgroup, custom_output_register_size=custom_output_register_size, custom_ancilla_register_size=custom_ancilla_register_size)
 
 
     def generate_standard_simon_circuit(self):

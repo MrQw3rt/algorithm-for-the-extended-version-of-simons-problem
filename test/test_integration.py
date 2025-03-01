@@ -3,10 +3,11 @@ import unittest
 from qiskit import ClassicalRegister, transpile
 from qiskit_aer import AerSimulator
 
-from simonalg.oracle import DefaultOracle
+from simonalg.oracle import DefaultOracle, CosetRepresentativeOracle
 from simonalg.simon_circuit import SimonCircuit
 from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup
 from simonalg.utils.grouptheory import expand_group
+from simonalg.utils.circuit import CircuitWrapper
 
 
 class SimonIterator:
@@ -67,3 +68,19 @@ class Integration(unittest.TestCase):
         print()
         print(hidden_subgroup_basis)
         print(expand_group(hidden_subgroup_basis, 3))
+
+
+    def test_second(self):
+        hidden_subgroup = ['0000', '1100']
+        n = len(hidden_subgroup[0])
+        oracle = CosetRepresentativeOracle(hidden_subgroup)
+
+        iterator = SimonIterator(SimonCircuit(oracle, custom_output_register_size=n), AerSimulator())
+
+        orthogonal_subgroup_basis = list(iterator)
+
+        hidden_subgroup_basis = convert_to_basis_of_hidden_subgroup(orthogonal_subgroup_basis, n)
+
+        print()
+        print(hidden_subgroup_basis)
+        print(expand_group(hidden_subgroup_basis, n))
