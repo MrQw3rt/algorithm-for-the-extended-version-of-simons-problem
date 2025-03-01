@@ -1,8 +1,6 @@
 from functools import reduce
 
-from .utils.circuit import CircuitWrapper, conditional_phase_shift_by_zero_vec, conditional_phase_shift_by_zero_vec_entire_register
-from qiskit.quantum_info import Operator
-from qiskit import QuantumRegister
+from .utils.circuit import CircuitWrapper, conditional_phase_shift_by_zero_vec_entire_register
 
 
 class SimonCircuit():
@@ -63,89 +61,6 @@ class SimonCircuit():
         circuit.h(blocking_qubit)
 
         return circuit
-    
-
-    # TODO unused right now
-    def generate_demo_forward_circuit(self):
-        forward_circuit = self.circuit_wrapper.generate_new_circuit()
-        input_register, output_register, blockingclause_register, ancilla_register = self.circuit_wrapper.get_registers()
-
-        forward_circuit.h(input_register[1])
-        forward_circuit.h(output_register[0])
-        forward_circuit.ccx(input_register[1], output_register[0], ancilla_register[0])
-        forward_circuit.z(ancilla_register[0])
-        forward_circuit.ccx(input_register[1], output_register[0], ancilla_register[0])
-
-        return forward_circuit
-
-
-    # TODO unused right now 
-    def generate_new_demo_forward_circuit(self):
-        circuit_wrapper = CircuitWrapper(['000', '110'])
-        circuit_wrapper.output_register = QuantumRegister(3)
-
-        input_register, output_register, _, ancilla_register = circuit_wrapper.get_registers()
-
-        # STANDARD SIMON
-        forward_circuit = circuit_wrapper.generate_new_circuit()
-        forward_circuit.h(input_register)
-
-        forward_circuit.cx(input_register[0], output_register[0])
-        forward_circuit.cx(input_register[1], output_register[1])
-        forward_circuit.cx(input_register[2], output_register[2])
-
-        forward_circuit.cx(input_register[1], output_register[1])
-        forward_circuit.cx(input_register[1], output_register[2])
-
-        forward_circuit.h(input_register)
-        forward_circuit.save_statevector(label='0_forward')
-
-        # CONDITIONAL PHASESHIFT BY INDEX
-        phaseshift_circuit = circuit_wrapper.generate_new_circuit()
-        phaseshift_circuit.s(input_register[0])
-        phaseshift_circuit.save_statevector(label='1_phaseshift_by_index')
-
-        # BACKWARD CIRCUIT
-        backward_circuit = circuit_wrapper.generate_new_circuit()
-        backward_circuit.h(input_register)
-
-        backward_circuit.cx(input_register[1], output_register[2])
-        backward_circuit.cx(input_register[1], output_register[1])
-
-        backward_circuit.cx(input_register[2], output_register[2])
-        backward_circuit.cx(input_register[1], output_register[1])
-        backward_circuit.cx(input_register[0], output_register[0])
-
-        backward_circuit.h(input_register)
-        backward_circuit.save_statevector(label='2_backward')
-
-        # PHASESHIFT BY ZEROVEC
-        phaseshift_z = circuit_wrapper.generate_new_circuit()
-        conditional_phase_shift_by_zero_vec(phaseshift_z, input_register, ancilla_register)
-        phaseshift_z.save_statevector(label='3_phaseshift_by_zerovec')
-
-        # STANDARD_SIMON
-        forward_circuit_2 = circuit_wrapper.generate_new_circuit()
-
-        forward_circuit_2.h(input_register)
-
-        forward_circuit_2.cx(input_register[0], output_register[0])
-        forward_circuit_2.cx(input_register[1], output_register[1])
-        forward_circuit_2.cx(input_register[2], output_register[2])
-
-        forward_circuit_2.cx(input_register[1], output_register[1])
-        forward_circuit_2.cx(input_register[1], output_register[2])
-
-        forward_circuit_2.h(input_register)
-        forward_circuit_2.save_statevector(label='4_final_forward')
-
-        return reduce(lambda a,b: a.compose(b), [
-            forward_circuit,
-            phaseshift_circuit,
-            backward_circuit,
-            phaseshift_z,
-            forward_circuit_2
-        ], circuit_wrapper.generate_new_circuit()), input_register
 
 
     def generate_remove_zero_circuit(self, bitstrings, index):
@@ -177,20 +92,6 @@ class SimonCircuit():
             second_forward_circuit
         ])
     
-
-    # TODO unused, remove later
-    def generate_remove_zero_operator(self, bitstrings, index):
-        standard_simon_circuit = self.generate_standard_simon_circuit()
-        blockingclause_circuit = self.add_blocking_clauses_for_bitstrings(bitstrings)
-
-        forward_operator = Operator(self._compose_circuits([standard_simon_circuit, blockingclause_circuit]))
-        backward_operator = forward_operator.adjoint()
-
-        phaseshift_by_index_operator = Operator(self.generate_phaseshift_by_index_circuit(index))
-        phaseshift_by_all_zero_vec_operator = Operator(self.generate_phaseshift_by_zero_vec_circuit())
-
-        return forward_operator.compose(phaseshift_by_index_operator).compose(backward_operator).compose(phaseshift_by_all_zero_vec_operator).compose(forward_operator)
-
 
     def generate_phaseshift_by_index_circuit(self, index):
         """
