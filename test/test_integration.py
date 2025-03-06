@@ -7,10 +7,9 @@ from simonalg.oracle import DefaultOracle, CosetRepresentativeOracle
 from simonalg.simon_circuit import SimonCircuit
 from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup
 from simonalg.utils.grouptheory import expand_group
-from simonalg.utils.circuit import CircuitWrapper
 
 
-class SimonIterator:
+class SimonSolver:
     def __init__(self, simon_circuit, backend, known_strings=[], blocked_indices=set()):
         self._simon_circuit = simon_circuit
         self._backend = backend
@@ -44,11 +43,11 @@ class SimonIterator:
         for i in working_indices:
             circuit = simon_circuit.generate_remove_zero_circuit(self._y, i)
             quantum_result = self._run_circuit(circuit, input_register)      
+            self._blocked_indices.add(i)
 
             y = list(quantum_result.keys())[0]
             if y != zerovec:
                 self._y.append(y)
-                self._blocked_indices.add(i)
                 return y
 
         raise StopIteration
@@ -60,7 +59,7 @@ class Integration(unittest.TestCase):
         hidden_subgroup = ['000', '001', '010', '011']
         oracle = DefaultOracle(hidden_subgroup)
 
-        iterator = SimonIterator(SimonCircuit(oracle), AerSimulator())
+        iterator = SimonSolver(SimonCircuit(oracle), AerSimulator())
         orthogonal_subgroup_basis = list(iterator)
 
         hidden_subgroup_basis = convert_to_basis_of_hidden_subgroup(orthogonal_subgroup_basis, 3)
@@ -75,7 +74,7 @@ class Integration(unittest.TestCase):
         n = len(hidden_subgroup[0])
         oracle = CosetRepresentativeOracle(hidden_subgroup)
 
-        iterator = SimonIterator(SimonCircuit(oracle, custom_output_register_size=n), AerSimulator())
+        iterator = SimonSolver(SimonCircuit(oracle, custom_output_register_size=n), AerSimulator())
 
         orthogonal_subgroup_basis = list(iterator)
 
