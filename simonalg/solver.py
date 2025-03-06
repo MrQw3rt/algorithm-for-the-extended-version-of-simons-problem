@@ -26,10 +26,10 @@ class SimonSolver:
         return result.get_counts(transpiled_circuit)
 
 
-    def get_new_orthogonal_subgroup_element(self, y=[], blocked_indices=set()):
+    def get_new_orthogonal_subgroup_element(self, Y=[], blocked_indices=set()):
         """
         Parameters:
-            - y is the list of orthogonal subgroup elements we have already sampled.
+            - Y is the list of orthogonal subgroup elements we have already sampled.
             - blocked_indices are those indices for which we already executed a quantum circuit
               and where we are hence guaranteed to not find a fresh element of the basis of the
               orthogonal subgroup.
@@ -40,17 +40,25 @@ class SimonSolver:
         working_indices = set(range(self._n)).difference(blocked_indices)
 
         for i in working_indices:
-            log.info(f'Generating quantum circuit with the following parameters: y={y}, index={i}')
-            circuit = simon_circuit.generate_remove_zero_circuit(y, i)
+            log.info(f'Generating quantum circuit with the following parameters: Y={Y}, index={i}, blocked_indices={blocked_indices}')
+            circuit = simon_circuit.generate_remove_zero_circuit(Y, i)
             log.debug(f'Generated quantum circuit is: \n{circuit}')
             quantum_result = self._run_circuit(circuit, input_register)
             log.info(f'Raw quantum result is: {quantum_result}')
 
-            blocked_indices.add(i)
             new_element = list(quantum_result.keys())[0]
-            log.info(f'Picked quantum result is: {new_element}')
-            if new_element != self._zerovec:
+            log.info(f'Picked the following quantum result: {new_element}')
+            if new_element[self._n - 1 - i] == '1':
+                blocked_indices.add(i)
+                log.info(f'Added index {i} to blocked indices')
                 return new_element
+            elif new_element != self._zerovec:
+                index_where_element_is_1 = list(filter(lambda i: new_element[i] == '1', range(len(new_element))))[-1]
+                blocked_indices.add(index_where_element_is_1)
+                log.info(f'Added index {index_where_element_is_1} to blocked indices')
+                return new_element
+
+        log.info('Quantum algorithm returned the zerovector for all working indices')
         return self._zerovec
     
 
@@ -58,17 +66,17 @@ class SimonSolver:
         """
         Implements the first stage of the algorithm from the proof of Theorem 5 in https://ieeexplore.ieee.org/abstract/document/595153.
         """
-        y = []
+        Y = []
         blocked_indices = set()
         
         done = False
         while not done:
-            orthogonal_subgroup_element = self.get_new_orthogonal_subgroup_element(y=y, blocked_indices=blocked_indices)
+            orthogonal_subgroup_element = self.get_new_orthogonal_subgroup_element(Y=Y, blocked_indices=blocked_indices)
             if orthogonal_subgroup_element != self._zerovec:
-                y.append(orthogonal_subgroup_element)
+                Y.append(orthogonal_subgroup_element)
             else:
                 done = True
-        return y
+        return Y
             
 
     def solve(self):
