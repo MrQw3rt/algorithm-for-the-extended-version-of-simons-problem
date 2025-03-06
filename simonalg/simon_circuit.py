@@ -64,6 +64,15 @@ class SimonCircuit():
 
 
     def generate_remove_zero_circuit(self, bitstrings, index):
+        """
+        Parameters:
+            - bitstrings are the bitstrings we already measured and would like to not measure again. All elements
+              are assumed to be non-zero and of equal length as the bitstrings of the oracle's hidden subgroup.
+            - index specifies which states to mark for amplitude amplification. All states with a 1 at index are
+              'good' states and the rest are the 'bad' states. We assume 0 <= index < len(bitstring) for each bitstring
+              in bitstrings.
+        Implements the quantum algorithm Q_i from https://ieeexplore.ieee.org/abstract/document/595153, Theorem 4.
+        """
         def generate_forward_circuit():
             standard_simon_circuit = self.generate_standard_simon_circuit()
             blockingclause_circuit = self.add_blocking_clauses_for_bitstrings(bitstrings)
