@@ -27,6 +27,14 @@ class SimonSolver:
 
 
     def get_new_orthogonal_subgroup_element(self, y=[], blocked_indices=set()):
+        """
+        Parameters:
+            - y is the list of orthogonal subgroup elements we have already sampled.
+            - blocked_indices are those indices for which we already executed a quantum circuit
+              and where we are hence guaranteed to not find a fresh element of the basis of the
+              orthogonal subgroup.
+        Implements the algorithm from the proof of Theorem 4 in https://ieeexplore.ieee.org/abstract/document/595153.
+        """
         simon_circuit = self._simon_circuit
         input_register = simon_circuit.circuit_wrapper.get_registers()[0]
         working_indices = set(range(self._n)).difference(blocked_indices)
@@ -47,6 +55,9 @@ class SimonSolver:
     
 
     def generate_basis_of_orthogonal_subgroup(self):
+        """
+        Implements the first stage of the algorithm from the proof of Theorem 5 in https://ieeexplore.ieee.org/abstract/document/595153.
+        """
         y = []
         blocked_indices = set()
         
@@ -61,6 +72,9 @@ class SimonSolver:
             
 
     def solve(self):
+        """
+        Implements the algorithm from the proof of Theorem 5 in https://ieeexplore.ieee.org/abstract/document/595153.
+        """
         basis_of_orthogonal_subgroup = self.generate_basis_of_orthogonal_subgroup()
         log.info(f'Basis of orthogonal subgroup is {basis_of_orthogonal_subgroup}')
         basis_of_hidden_subgroup = convert_to_basis_of_hidden_subgroup(basis_of_orthogonal_subgroup, self._n)
