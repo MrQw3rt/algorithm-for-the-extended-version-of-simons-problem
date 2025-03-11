@@ -29,16 +29,15 @@ Note that the above command installs `qiskit` and `qiskit-aer` system-wide!
 
 ## Run Test Suite
 
-In the project root, run
+To verify that everything works, you can run the test suite for the `solver` class:
+```
+(.venv) $ python3 -m unittest discover -s ./test -p test_solver.py
+```
+You can also run the entire test suite via the command
 ```
 (.venv) $ python3 -m unittest discover -v -s ./test
 ```
 Depending on your hardware, executing the entire test suite can take a couple of minutes.
-
-You can run individual test suites like `test_simon_remove_all_zero.py` with the following command:
-```
-(.venv) $ python3 -m unittest discover -s ./test -p test_simon_remove_all_zero.py
-```
 
 
 ## Quickstart
@@ -63,7 +62,7 @@ print(hidden_subgroup_basis)
 * The `hidden_subgroup` is given as a list of bitstrings. It is assumed that **all** bitstrings that make up the hidden subgroup are contained in the list. Use the `expand_group` method from the `simonalg.utils.grouptheory` module if you only want to specify a generating set.
 * The `DefaultOracle` class automatically constructs a quantum circuit that implements a valid oracle for the hidden subgroup. For a guide on how to program your own oracle implementation, refer to [here](#oracles).
 * The `SimonCircuit` class capsules functionality for creating quantum circuits needed for the extended version of Simon's problem. For details, please refer to the [implementation](./simonalg/simon_circuit.py).
-* The `SimonSolver` class implements the functionality from the algorithm for the extended version of Simon's problem (Theorem 5 in [the paper by Brassard and Høyer](https://ieeexplore.ieee.org/abstract/document/595153)). It is described in more detail [here](TODO).
+* The `SimonSolver` class implements the functionality from the algorithm for the extended version of Simon's problem (Theorem 5 in [the paper by Brassard and Høyer](https://ieeexplore.ieee.org/abstract/document/595153)). For details, have a look at the [implementation](./simonalg/solver.py).
 
 You can experiment with different hidden subgroups. You can of course also use Qiskit backends other than the `AerSimulator` from the example code. If you use a simulator, be aware that for $n \geq 4$, depending on your hardware, the simulations can get very slow, since the implementation requires many ancillary qubits.
 
@@ -154,4 +153,5 @@ simon_circuit = SimonCircuit(SimpleOracle(hidden_subgroup), custom_output_regist
 solver = SimonSolver(simon_circuit, AerSimulator())
 
 hidden_subgroup_basis = solver.solve()
+print(hidden_subgroup_basis)
 ```
