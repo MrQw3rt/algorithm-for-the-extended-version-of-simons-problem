@@ -3,6 +3,9 @@ from qiskit import ClassicalRegister, transpile
 from qiskit_aer import AerSimulator
 
 import unittest
+import logging
+log = logging.getLogger(__name__)
+
 from functools import reduce
 
 from simonalg.oracle import DefaultOracle
@@ -11,10 +14,8 @@ from simonalg.utils.grouptheory import generate_group_by_order, generate_orthogo
 
 
 def log_parameters(params):
-    print()
-    print()
     for message, object in params:
-        print(message, object)
+        log.info(f'{message} {object}')
 
 
 def format_statevector(sv, input_register, output_register):
@@ -37,9 +38,7 @@ def log_statevectors(result, input_register, output_register):
     
     strings = [f'{t[0]}\n{t[1]}' for t in strings]
     res = '\n'.join(strings)
-    print()
-    print('Statevectors:')
-    print(res)
+    log.info(f'Statevectors:\n{res}')
 
 
 def run_circuit(circuit, measured_registers):
@@ -82,7 +81,7 @@ def construct_and_run_extended_simon_circuit(hidden_subgroup, index, orthogonal_
     ] + ([('Generated Circuit\n', rmz_circuit)] if log_circuit else []))
 
     result = run_circuit(rmz_circuit, [input_register])
-    print('Results: ', result)
+    log.info(f'Results: {result}')
 
     return list(result.keys())
 
