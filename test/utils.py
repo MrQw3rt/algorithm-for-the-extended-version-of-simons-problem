@@ -102,17 +102,19 @@ def construct_extended_simon_circuit_and_run_for_every_possible_index(hidden_sub
 
     all_indices_that_can_be_1 = find_indices_that_can_be_1(orthogonal_subgroup)
     indices_locked_by_bitstrings = []
+    blocking_params = []
     for bitstring in blockingclause_bitstrings:
         for index in find_indices_that_can_be_1([bitstring]):
             if len(indices_locked_by_bitstrings) == 0 or indices_locked_by_bitstrings[-1] < index:
                 indices_locked_by_bitstrings.append(index)
+                blocking_params.append((bitstring, index))
                 break
     indices_that_can_be_1_after_bitstrings = list(set(all_indices_that_can_be_1).difference(set(indices_locked_by_bitstrings)))
     if len(indices_that_can_be_1_after_bitstrings) == 0:
         indices_that_can_be_1_after_bitstrings = range(n)
 
     for index in indices_that_can_be_1_after_bitstrings:
-        measurements = construct_and_run_extended_simon_circuit(hidden_subgroup, index, orthogonal_subgroup, blockingclause_bitstrings=blockingclause_bitstrings, log_circuit=log_circuit_and_statevector)
+        measurements = construct_and_run_extended_simon_circuit(hidden_subgroup, index, orthogonal_subgroup, blockingclause_bitstrings=blocking_params, log_circuit=log_circuit_and_statevector)
         if log_circuit_and_statevector:
             sv_circuit, sv_input_register, sv_output_register = construct_extended_simon_circuit(hidden_subgroup, index)
             result_sv = run_circuit_without_measurement(sv_circuit).data(0)

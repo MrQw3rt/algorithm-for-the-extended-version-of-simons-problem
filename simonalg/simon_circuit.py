@@ -26,36 +26,39 @@ class SimonCircuit():
         return self._compose_circuits([hadamard_circuit_1, oracle_circuit, hadamard_circuit_2])
 
 
-    def add_blocking_clauses_for_bitstrings(self, bitstrings):
+    def add_blocking_clauses(self, blockingclauses):
         """
         Parameters:
-            - bitstrings are the bitstrings we would like to remove from a superposition. All elements
-              are assumed to be non-zero and of equal length as the bitstrings of the oracle's hidden subgroup.
+            - blockingclauses are tuples of the form (bitstring, j) where bitstring is the bistring we would like to
+              remove from a superposition and j is the index where bitstring is 1 according to Lemma 6 of
+              https://ieeexplore.ieee.org/abstract/document/595153. bitstring is assumed to be of equal length as
+              the bitstrings of the oracle's hidden subgroup.
         Modifies the circuit according to https://ieeexplore.ieee.org/abstract/document/595153, Lemma 7.
         """
-        blockingclause_circuits = [self.generate_blockingclause_circuit(bitstring, blocking_index) for blocking_index, bitstring in enumerate(bitstrings)]
+        blockingclause_circuits = [self.generate_blockingclause_circuit(bitstring, blocking_index) for blocking_index, bitstring in enumerate(blockingclauses)]
         return self._compose_circuits(blockingclause_circuits)
 
 
-    def generate_blockingclause_circuit(self, bitstring, blocking_index):
+    def generate_blockingclause_circuit(self, blockingclause, blocking_index):
         """
         Parameters:
-            - bitstring is the bitstring we would like to remove from a superposition. bitstring is assumed to be
-              non-zero and of equal length as the bitstrings of the oracle's hidden subgroup.
+            - blockingclause is a tuple of the form (bitstring, j) where bitstring is the bistring we would like to
+              remove from a superposition and j is the index where bitstring is 1 according to Lemma 6 of
+              https://ieeexplore.ieee.org/abstract/document/595153. bitstring is assumed to be of equal length as
+              the bitstrings of the oracle's hidden subgroup.
             - blocking_index is a technical parameter specifying which control qubit from the blockingclause_register
-              to use. IMPORTANT: blocking_index will be counted 'from the right', i.e. the blocking_index 0 refers to
-              the least significant bit in a bitstring and NOT bitstring[0].
+              to use.
         Modifies the circuit according to https://ieeexplore.ieee.org/abstract/document/595153, Lemma 6.
         """
+        bitstring, j = blockingclause
         indices_where_bitstring_is_1 = list(filter(lambda i: bitstring[i] == '1', range(len(bitstring))))
-        j = indices_where_bitstring_is_1[-1]
 
         circuit = self.circuit_wrapper.generate_new_circuit()
         input_register, _, blockingclause_register, _ = self.circuit_wrapper.get_registers()
 
         blocking_qubit = blockingclause_register[len(blockingclause_register) - 1 - blocking_index]
 
-        circuit.cx(input_register[len(input_register) - 1 - j], blocking_qubit)
+        circuit.cx(input_register[j], blocking_qubit)
         for i in indices_where_bitstring_is_1:
             circuit.cx(blocking_qubit, input_register[len(input_register) - 1 - i])
 
@@ -76,7 +79,7 @@ class SimonCircuit():
         """
         def generate_forward_circuit():
             standard_simon_circuit = self.generate_standard_simon_circuit()
-            blockingclause_circuit = self.add_blocking_clauses_for_bitstrings(bitstrings)
+            blockingclause_circuit = self.add_blocking_clauses(bitstrings)
             return self._compose_circuits([standard_simon_circuit, blockingclause_circuit])
         
         first_forward_circuit = generate_forward_circuit()

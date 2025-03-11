@@ -17,7 +17,7 @@ class SimonBlockingclauseAndRemoveZero(BaseAssertions):
 
     def test_blockingclause_and_remove_zero_two_qubits_2(self):
         hidden_subgroup = ['00']
-        blockingclauses = ['10', '01']
+        blockingclauses = ['01', '10']
         construct_extended_simon_circuit_and_run_for_every_possible_index(hidden_subgroup, blockingclauses, self.assert_only_all_zero_is_measured)
 
 

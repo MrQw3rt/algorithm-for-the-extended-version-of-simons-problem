@@ -40,7 +40,7 @@ class SimonSolver:
         working_indices = set(range(self._n)).difference(blocked_indices)
 
         for i in working_indices:
-            log.info(f'Generating quantum circuit with the following parameters: Y={Y}, index={i}, blocked_indices={blocked_indices}')
+            log.info(f'Generating quantum circuit with the following parameters: Y={Y}, good_state_index={i}, blocked_indices={blocked_indices}')
             circuit = simon_circuit.generate_remove_zero_circuit(Y, i)
             log.debug(f'Generated quantum circuit is: \n{circuit}')
             quantum_result = self._run_circuit(circuit, input_register)
@@ -48,15 +48,22 @@ class SimonSolver:
 
             new_element = list(quantum_result.keys())[0]
             log.info(f'Picked the following quantum result: {new_element}')
+            blocked_indices.add(i)
+            log.info(f'Added index {i} to blocked indices')
             if new_element[self._n - 1 - i] == '1':
-                blocked_indices.add(i)
-                log.info(f'Added index {i} to blocked indices')
-                return new_element
+                log.info(f'The quanatum routine yielded a bitstring with 1 at index {i}')
+                return (new_element, i)
             elif new_element != self._zerovec:
-                index_where_element_is_1 = list(filter(lambda i: new_element[i] == '1', range(len(new_element))))[-1]
-                blocked_indices.add(index_where_element_is_1)
-                log.info(f'Added index {index_where_element_is_1} to blocked indices')
-                return new_element
+                string_indices_where_element_is_1 = filter(lambda i: (new_element[i] == '1'), range(len(new_element)))
+                register_indices_where_element_is_1 = [self._n - 1 - index for index in string_indices_where_element_is_1]
+                free_register_indices_where_element_is_1 = list(filter(lambda index: index not in blocked_indices, register_indices_where_element_is_1))
+                blocking_index = free_register_indices_where_element_is_1[-1]
+
+                blocked_indices.add(blocking_index)
+                log.info(f'The quantum routine did not yield a bitstring with 1 at index {i}, but it yielded a different bitstring with 1 at index {blocking_index}')
+                log.info(f'Added index {blocked_indices} to blocked indices')
+                return (new_element, blocking_index)
+            log.info(f'The quantum routine yielded the zerovector for working index {i}')
 
         log.info('Quantum algorithm returned the zerovector for all working indices')
         return self._zerovec
@@ -76,7 +83,7 @@ class SimonSolver:
                 Y.append(orthogonal_subgroup_element)
             else:
                 done = True
-        return Y
+        return [y[0] for y in Y]
             
 
     def solve(self):
