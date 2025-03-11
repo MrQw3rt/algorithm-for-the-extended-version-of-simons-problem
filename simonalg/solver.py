@@ -33,7 +33,8 @@ class SimonSolver:
             - blocked_indices are those indices for which we already executed a quantum circuit
               and where we are hence guaranteed to not find a fresh element of the basis of the
               orthogonal subgroup.
-        Implements the algorithm from the proof of Theorem 4 in https://ieeexplore.ieee.org/abstract/document/595153.
+        Implements the algorithm from the proof of Theorem 4 in https://ieeexplore.ieee.org/abstract/document/595153. For multi-shot
+        quantum computer calls, we always take the bitstring that has been measured most often.
         """
         simon_circuit = self._simon_circuit
         input_register = simon_circuit.circuit_wrapper.get_registers()[0]
@@ -46,12 +47,15 @@ class SimonSolver:
             quantum_result = self._run_circuit(circuit, input_register)
             log.info(f'Raw quantum result is: {quantum_result}')
 
-            new_element = list(quantum_result.keys())[0]
+            measured_elements = list(quantum_result.keys())
+            measured_elements.sort(key=lambda e: quantum_result[e], reverse=True)
+            new_element = measured_elements[0]
+
             log.info(f'Picked the following quantum result: {new_element}')
             blocked_indices.add(i)
             log.info(f'Added index {i} to blocked indices')
             if new_element[self._n - 1 - i] == '1':
-                log.info(f'The quanatum routine yielded a bitstring with 1 at index {i}')
+                log.info(f'The quantum routine yielded a bitstring with 1 at index {i}')
                 return (new_element, i)
             elif new_element != self._zerovec:
                 string_indices_where_element_is_1 = filter(lambda i: (new_element[i] == '1'), range(len(new_element)))
