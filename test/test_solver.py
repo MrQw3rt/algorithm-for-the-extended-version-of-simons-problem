@@ -1,6 +1,4 @@
 import unittest
-import logging
-logging.basicConfig(level=logging.INFO)
 
 from qiskit_aer import AerSimulator
 
