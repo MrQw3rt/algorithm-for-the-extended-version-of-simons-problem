@@ -83,7 +83,7 @@ Implementation details of this class can be found [here](./simonalg/utils/circui
 
 ### Oracles
 
-Any custom oracle implementation is just a class that has the `_hidden_subgroup` field populated (needed by the `SimonCircuit` class) and that  implements the `generate_circuit` method. Here is a template:
+Any custom oracle implementation is just a class that has the `_hidden_subgroup` field populated (needed by the `SimonCircuit` class) and that implements the `generate_circuit` method. Here is a template:
 ```python
 class CustomOracle:
     def __init__(self, hidden_subgroup):
@@ -140,6 +140,10 @@ from simonalg.simon_circuit import SimonCircuit
 from simonalg.solver import SimonSolver
 
 class SimpleOracle:
+    def __init__(self, hidden_subgroup):
+            self._hidden_subgroup = hidden_subgroup
+
+            
     def generate_circuit(self, circuit_wrapper):
         input_register, output_register, _, ancilla_register = circuit_wrapper.get_registers()
         circuit = circuit_wrapper.generate_new_circuit()
