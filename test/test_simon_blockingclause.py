@@ -1,14 +1,18 @@
 import unittest
 
+from utils import run_circuit
 from simonalg.oracle import DefaultOracle
 from simonalg.simon_circuit import SimonCircuit
 from simonalg.utils.grouptheory import is_in_orthogonal_group
 
-from utils import run_circuit
 
 
 class SimonBlockingclauseTest(unittest.TestCase):
-    def run_circuit_with_blockingclause_and_assert_correct_behaviour(self, hidden_subgroup, blockingclauses):
+    def run_circuit_with_blockingclause_and_assert_correct_behaviour(
+        self,
+        hidden_subgroup,
+        blockingclauses
+    ):
         oracle = DefaultOracle(hidden_subgroup)
         simon_circuit = SimonCircuit(oracle)
 
@@ -16,7 +20,10 @@ class SimonBlockingclauseTest(unittest.TestCase):
         blockingclauses_circuit = simon_circuit.add_blocking_clauses(blockingclauses)
 
         input_register, _, _, ancilla_register = simon_circuit.circuit_wrapper.get_registers()
-        result = run_circuit(standard_circuit.compose(blockingclauses_circuit), [input_register, ancilla_register])
+        result = run_circuit(
+            standard_circuit.compose(blockingclauses_circuit),
+            [input_register, ancilla_register]
+        )
 
         # resulting bitstrings must all be in the orthogonal group of the hidden subgroup
         register_states = [k.split(' ') for k in result.keys()]
@@ -38,49 +45,79 @@ class SimonBlockingclauseTest(unittest.TestCase):
 
     def test_blockingclause_two_qubits_1(self):
         hidden_subgroup = ['00', '01']
-        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(hidden_subgroup, [('10', 1)])
+        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(
+            hidden_subgroup,
+            [('10', 1)]
+        )
 
 
     def test_blockingclause_two_qubits_2(self):
         hidden_subgroup = ['00', '10']
-        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(hidden_subgroup, [('01', 0)])
+        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(
+            hidden_subgroup,
+            [('01', 0)]
+        )
 
 
     def test_blockingclause_two_qubits_3(self):
         hidden_subgroup = ['00', '11']
-        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(hidden_subgroup, [('11', 0)])
+        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(
+            hidden_subgroup,
+            [('11', 0)]
+        )
 
 
     def test_blockingclauses_three_qubits_1(self):
         hidden_subgroup = ['000', '100']
-        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(hidden_subgroup, [('011', 0)])
+        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(
+            hidden_subgroup,
+            [('011', 0)]
+        )
 
 
     def test_blockingclauses_three_qubits_2(self):
         hidden_subgroup = ['000', '100']
-        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(hidden_subgroup, [('001', 0)])
+        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(
+            hidden_subgroup,
+            [('001', 0)]
+        )
 
 
     def test_blockingclauses_three_qubits_3(self):
         hidden_subgroup = ['000', '100']
-        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(hidden_subgroup, [('010', 1), ('001', 0)])
+        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(
+            hidden_subgroup,
+            [('010', 1), ('001', 0)]
+        )
 
 
     def test_blockingclauses_three_qubits_4(self):
         hidden_subgroup = ['000', '100']
-        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(hidden_subgroup, [('011', 1), ('001', 0)])
+        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(
+            hidden_subgroup,
+            [('011', 1), ('001', 0)]
+        )
 
 
     def test_blockingclauses_four_qubits_1(self):
         hidden_subgroup = ['0000', '0001']
-        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(hidden_subgroup, [('1000', 3)])
+        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(
+            hidden_subgroup,
+            [('1000', 3)]
+        )
 
 
     def test_blockingclauses_four_qubits_2(self):
         hidden_subgroup = ['0000', '0001']
-        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(hidden_subgroup, [('1000', 3), ('0110', 2)])
+        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(
+            hidden_subgroup,
+            [('1000', 3), ('0110', 2)]
+        )
 
 
     def test_blockingclauses_four_qubits_3(self):
         hidden_subgroup = ['0000', '0001']
-        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(hidden_subgroup, [('1000', 3), ('0110', 2), ('0010', 1)])
+        self.run_circuit_with_blockingclause_and_assert_correct_behaviour(
+            hidden_subgroup,
+            [('1000', 3), ('0110', 2), ('0010', 1)]
+        )
