@@ -1,3 +1,10 @@
+"""
+Contains functions that implement operations on bitstrings like XOR or the bitwise inner product
+modulo 2. Furthermore, there are functions for common group theoretical operations like generating
+cosets or expanding a group from a generating set.
+"""
+
+
 def xor(a, b):
     """
     Parameters:
@@ -19,7 +26,7 @@ def generate_coset(representative, subgroup):
     return { xor(representative, h) for h in subgroup }
 
 
-def generate_group_by_order(order, strings=['0', '1']):
+def generate_group_by_order(order, strings=None):
     """
     Parameters:
         - order is the size of the group of bitstrings to be generated.
@@ -27,6 +34,9 @@ def generate_group_by_order(order, strings=['0', '1']):
     Output:
         A list of all bitstrings in the group of bitstrings with specified order.
     """
+    if strings is None:
+        strings = ['0', '1']
+
     if order == 1:
         return strings
 
@@ -49,7 +59,7 @@ def generate_cosets_for_subgroup(group, subgroup):
     for representative in group:
         if representative not in group_set:
             continue
-    
+
         coset = generate_coset(representative, subgroup)
         cosets.append(coset)
         for coset_member in coset:
@@ -63,16 +73,18 @@ def bitwise_inner_product(bitstring_a, bitstring_b):
         - bitstring_a, bitstring_b are bitstrings of equal length
     Returns the bitwise inner product of the two inputs.
     """
-    return sum([int(a) * int(b) for (a, b) in zip(bitstring_a, bitstring_b)]) % 2
+    return sum(int(a) * int(b) for (a, b) in zip(bitstring_a, bitstring_b)) % 2
 
 
 def is_in_orthogonal_group(bitstring, group):
     """
     Parameters:
-        - bitstring is the bitstring for which we want to test whether it is in the orthogonal group of group.
-        - group is assumed to be complete and all elements of group have the same length as bitstring.
+        - bitstring is the bitstring for which we want to test whether it is in the 
+          orthogonal group of group.
+        - group is assumed to be complete and all elements of group have the same 
+          length as bitstring.
     """
-    return all([bitwise_inner_product(bitstring, g) == 0 for g in group])
+    return all(bitwise_inner_product(bitstring, g) == 0 for g in group)
 
 
 def generate_orthogonal_group(group, subgroup):
@@ -82,7 +94,9 @@ def generate_orthogonal_group(group, subgroup):
         - subgroup is some complete subgroup.
     Returns the orthogonal group to subgroup as a list.
     """
-    orthogonal_group = list(filter(lambda bitstring: is_in_orthogonal_group(bitstring, subgroup), group))
+    orthogonal_group = list(
+        filter(lambda bitstring: is_in_orthogonal_group(bitstring, subgroup), group)
+    )
     orthogonal_group.sort()
     return orthogonal_group
 
@@ -98,7 +112,7 @@ def expand_group(basis, n):
 
     if len(basis) == 0:
         return expanded_group
-    
+
     for element in basis:
         fresh_elements = []
         for exp_element in expanded_group:
