@@ -27,7 +27,7 @@ $ pip3 install -r requirements.txt
 Note that the above command installs `qiskit` and `qiskit-aer` system-wide!
 
 
-## Run Test Suite
+### Run Test Suite
 
 To verify that everything works, you can run the test suite for the `solver` class:
 ```

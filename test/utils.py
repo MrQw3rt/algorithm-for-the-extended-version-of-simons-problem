@@ -3,14 +3,15 @@ from qiskit import ClassicalRegister, transpile
 from qiskit_aer import AerSimulator
 
 import unittest
-import logging
-log = logging.getLogger(__name__)
+
+from simonalg.utils.logging import log
 
 from functools import reduce
 
 from simonalg.oracle import DefaultOracle
 from simonalg.simon_circuit import SimonCircuit
 from simonalg.utils.grouptheory import generate_group_by_order, generate_orthogonal_group, is_in_orthogonal_group
+from simonalg.utils.logging import test_logger as log
 
 
 def log_parameters(params):
