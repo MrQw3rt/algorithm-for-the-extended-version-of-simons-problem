@@ -1,4 +1,5 @@
-[PER-FILE-IGNORES]
-test/*.py: C0114
-test/*.py: C0115
-test/*.py: C0116
+[MESSAGES CONTROL]
+disable=C0114,C0115,C0116,E0015
+
+[PATHS]
+ignored-patterns=test/*.py
