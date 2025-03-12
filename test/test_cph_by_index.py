@@ -3,10 +3,9 @@ import unittest
 from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit
 import numpy as np
 
-
+from utils import run_circuit_without_measurement
 from simonalg.utils.grouptheory import generate_group_by_order
 from simonalg.utils.circuit import conditional_phase_shift_by_index
-from utils import run_circuit_without_measurement
 
 
 class CPHByIndexTest(unittest.TestCase):
@@ -43,7 +42,9 @@ class CPHByIndexTest(unittest.TestCase):
                 conditional_phase_shift_by_index(circuit, input_register, ancilla_register, index)
 
                 circuit.save_statevector()
-                self.run_circuit_and_assert_correct_conditional_phaseshift(circuit, bitstring, index)
+                self.run_circuit_and_assert_correct_conditional_phaseshift(
+                    circuit, bitstring, index
+                )
 
 
     def test_conditional_phaseshift_bitstring_size_3(self):
@@ -59,8 +60,10 @@ class CPHByIndexTest(unittest.TestCase):
                 conditional_phase_shift_by_index(circuit, input_register, ancilla_register, index)
 
                 circuit.save_statevector()
-                self.run_circuit_and_assert_correct_conditional_phaseshift(circuit, bitstring, index)
-                    
+                self.run_circuit_and_assert_correct_conditional_phaseshift(
+                    circuit, bitstring, index
+                )
+
 
     def test_conditional_phaseshift_bitstring_size_4(self):
         input_register_size = 4
@@ -75,5 +78,7 @@ class CPHByIndexTest(unittest.TestCase):
                 conditional_phase_shift_by_index(circuit, input_register, ancilla_register, index)
 
                 circuit.save_statevector()
-                self.run_circuit_and_assert_correct_conditional_phaseshift(circuit, bitstring, index)
+                self.run_circuit_and_assert_correct_conditional_phaseshift(
+                    circuit, bitstring, index
+                )
                 
