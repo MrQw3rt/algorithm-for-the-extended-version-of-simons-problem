@@ -1,10 +1,7 @@
-import logging
-log = logging.getLogger(__name__)
-
 from qiskit import ClassicalRegister, transpile
 
 from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup
-
+from simonalg.utils.logging import log
 
 class SimonSolver:
     def __init__(self, simon_circuit, backend):
@@ -43,7 +40,7 @@ class SimonSolver:
         for i in working_indices:
             log.info(f'Generating quantum circuit with the following parameters: Y={Y}, good_state_index={i}, blocked_indices={blocked_indices}')
             circuit = simon_circuit.generate_remove_zero_circuit(Y, i)
-            log.debug(f'Generated quantum circuit is: \n{circuit}')
+            log.debug(f'\n{circuit.draw(fold=-1)}')
             quantum_result = self._run_circuit(circuit, input_register)
             log.info(f'Raw quantum result is: {quantum_result}')
 
@@ -51,7 +48,7 @@ class SimonSolver:
             measured_elements.sort(key=lambda e: quantum_result[e], reverse=True)
             new_element = measured_elements[0]
 
-            log.info(f'Picked the following quantum result: {new_element}')
+            log.info(f'Picked the quantum result with highest count: {new_element}')
             blocked_indices.add(i)
             log.info(f'Added index {i} to blocked indices')
             if new_element[self._n - 1 - i] == '1':
@@ -65,7 +62,7 @@ class SimonSolver:
 
                 blocked_indices.add(blocking_index)
                 log.info(f'The quantum routine did not yield a bitstring with 1 at index {i}, but it yielded a different bitstring with 1 at index {blocking_index}')
-                log.info(f'Added index {blocked_indices} to blocked indices')
+                log.info(f'Added index {blocking_index} to blocked indices')
                 return (new_element, blocking_index)
             log.info(f'The quantum routine yielded the zerovector for working index {i}')
 
@@ -94,8 +91,10 @@ class SimonSolver:
         """
         Implements the algorithm from the proof of Theorem 5 in https://ieeexplore.ieee.org/abstract/document/595153.
         """
+        log.info(f'[STARTED] Extended version of Simon\'s algorithm for hidden subgroup {self._simon_circuit._oracle._hidden_subgroup}')
         basis_of_orthogonal_subgroup = self.generate_basis_of_orthogonal_subgroup()
         log.info(f'Basis of orthogonal subgroup is {basis_of_orthogonal_subgroup}')
         basis_of_hidden_subgroup = convert_to_basis_of_hidden_subgroup(basis_of_orthogonal_subgroup, self._n)
 
+        log.info(f'[FINISHED] Reconstruction of hidden subgroup {basis_of_hidden_subgroup}')
         return basis_of_hidden_subgroup

@@ -155,3 +155,18 @@ solver = SimonSolver(simon_circuit, AerSimulator())
 hidden_subgroup_basis = solver.solve()
 print(hidden_subgroup_basis)
 ```
+
+## Logging
+
+By default, the `SimonSolver` class writes logs to `stdout` at `INFO` level. The corresponding logger config is [here](./simonalg/utils/logging.py). You can switch the logger off like this:
+```python
+from simonalg.utils.logging import log
+log.disabled = True
+```
+At `DEBUG` level, the `SimonSolver` class will additionally print out the generated quantum circuits. You can set the logger to `DEBUG` like this:
+```python
+from simonalg.utils.logging import log
+log.setLevel('DEBUG')
+```
+* **Attention** most quantum circuits will be wider than your terminal and won't be displayed correctly there. I recommend piping logs containing quantum circuits into a text file, since
+  there everything will be formatted correctly.
