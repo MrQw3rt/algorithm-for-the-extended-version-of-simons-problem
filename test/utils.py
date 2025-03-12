@@ -75,7 +75,9 @@ def construct_extended_simon_circuit(hidden_subgroup, index, blockingclause_bits
     simon_circuit = SimonCircuit(oracle)
 
     input_register, output_register, _, _ = simon_circuit.circuit_wrapper.get_registers()
-    rmz_circuit = simon_circuit.generate_remove_zero_circuit(blockingclause_bitstrings, index)
+    rmz_circuit = simon_circuit.generate_remove_zero_circuit(
+        blockingclause_bitstrings, index, for_aer_simulator=True
+    )
     return rmz_circuit, input_register, output_register
 
 

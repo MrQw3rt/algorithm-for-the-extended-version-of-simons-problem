@@ -4,6 +4,7 @@ the algorithm from the proof of Theorem 5 in https://ieeexplore.ieee.org/abstrac
 """
 
 from qiskit import ClassicalRegister, transpile
+from qiskit.transpiler.passes import RemoveBarriers
 
 from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup
 from simonalg.utils.logging import log
@@ -27,7 +28,8 @@ class SimonSolver:
         for i in range(input_register.size):
             circuit.measure(input_register[i], classical_register[i])
 
-        transpiled_circuit = transpile(circuit, self._backend)
+        remove_barriers = RemoveBarriers()
+        transpiled_circuit = transpile(remove_barriers(circuit), self._backend)
         result = self._backend.run(transpiled_circuit).result()
 
         return result.get_counts(transpiled_circuit)

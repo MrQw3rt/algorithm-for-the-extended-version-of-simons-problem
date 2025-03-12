@@ -5,6 +5,8 @@ for the implementation of Simon's algorithm.
 
 from functools import reduce
 
+from qiskit_aer.library import save_statevector
+
 from .utils.circuit import CircuitWrapper, conditional_phase_shift_by_zero_vec_entire_register
 
 
@@ -87,7 +89,7 @@ class SimonCircuit():
         return circuit
 
 
-    def generate_remove_zero_circuit(self, bitstrings, index):
+    def generate_remove_zero_circuit(self, bitstrings, index, for_aer_simulator=False):
         """
         Parameters:
             - bitstrings are the bitstrings we already measured and would like to not measure 
@@ -105,27 +107,32 @@ class SimonCircuit():
             return self._compose_circuits([standard_simon_circuit, blockingclause_circuit])
 
         first_forward_circuit = generate_forward_circuit()
-        first_forward_circuit.save_statevector(label='1_forward')
-
         phaseshift_by_index_circuit = self.generate_phaseshift_by_index_circuit(index)
-        phaseshift_by_index_circuit.save_statevector(label='2_phaseshift_by_index')
-
         backward_circuit = generate_forward_circuit().inverse()
-        backward_circuit.save_statevector(label='3_backward')
-
         phaseshift_by_all_zero_vec_circuit = self.generate_phaseshift_by_zero_vec_circuit()
-        phaseshift_by_all_zero_vec_circuit.save_statevector(label='4_phaseshift_by_zerovec')
-
         second_forward_circuit = generate_forward_circuit()
-        second_forward_circuit.save_statevector(label='5_final_forward')
 
-        return self._compose_circuits([
+        labels = [
+            '1_forward', 
+            '2_phaseshift_by_index', 
+            '3_backward', 
+            '4_phaseshift_by_zerovec', 
+            '5_final_forward'
+        ]
+        circuits = [
             first_forward_circuit,
             phaseshift_by_index_circuit,
             backward_circuit,
             phaseshift_by_all_zero_vec_circuit,
             second_forward_circuit
-        ])
+        ]
+        for circuit, label in zip(circuits, labels):
+            if for_aer_simulator:
+                save_statevector(circuit, label=label)
+            else:
+                circuit.barrier(label=label)
+
+        return self._compose_circuits(circuits)
 
 
     def generate_phaseshift_by_index_circuit(self, index):
