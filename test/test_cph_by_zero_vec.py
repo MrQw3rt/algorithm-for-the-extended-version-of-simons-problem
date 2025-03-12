@@ -4,9 +4,9 @@ from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit
 import numpy as np
 
 
+from utils import run_circuit_without_measurement
 from simonalg.utils.grouptheory import generate_group_by_order
 from simonalg.utils.circuit import conditional_phase_shift_by_zero_vec
-from utils import run_circuit_without_measurement
 
 
 class CPHByZeroVecTest(unittest.TestCase):
