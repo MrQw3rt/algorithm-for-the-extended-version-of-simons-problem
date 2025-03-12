@@ -1,11 +1,9 @@
 import unittest
 
+from utils import run_circuit
 from simonalg.oracle import DefaultOracle
 from simonalg.utils.grouptheory import generate_group_by_order, generate_cosets_for_subgroup
 from simonalg.utils.circuit import CircuitWrapper
-
-
-from utils import run_circuit
 
 
 class OracleTest(unittest.TestCase):
@@ -17,15 +15,19 @@ class OracleTest(unittest.TestCase):
         results = {}
         for bitstring in group:
             circuit_wrapper = CircuitWrapper(hidden_subgroup)
-            input_register, output_register, blockingclause_register, ancilla_register = circuit_wrapper.get_registers()
+            registers = circuit_wrapper.get_registers()
+            input_register, output_register, blockingclause_register, ancilla_register = registers
 
             init_circuit = circuit_wrapper.generate_new_circuit(init_vector=bitstring)
 
             oracle = DefaultOracle(hidden_subgroup)
             oracle_circuit = oracle.generate_circuit(circuit_wrapper)
 
-            result = run_circuit(init_circuit.compose(oracle_circuit), [input_register, output_register, blockingclause_register, ancilla_register])
-        
+            result = run_circuit(
+                init_circuit.compose(oracle_circuit), 
+                [input_register, output_register, blockingclause_register, ancilla_register]
+            )
+
             self.assertIs(len(result), 1)
             register_states = list(result.keys())[0]
 
@@ -39,10 +41,12 @@ class OracleTest(unittest.TestCase):
         coset_results = []
         for coset in cosets:
             coset_mappings = [results[bitstring] for bitstring in coset]
-            self.assertTrue(all(r == coset_mappings[0] for r in coset_mappings))    # Check that oracle behaves constant on a coset
+            # Check that oracle behaves constant on a coset
+            self.assertTrue(all(r == coset_mappings[0] for r in coset_mappings))
             coset_results.append(coset_mappings[0])
-        
-        self.assertEqual(len(coset_results), len(set(coset_results)))   # Check that oracle behaves different for each coset
+
+        # Check that oracle behaves different for each coset
+        self.assertEqual(len(coset_results), len(set(coset_results)))
 
 
     def test_oracle_tow_qubits_1(self):
@@ -79,7 +83,7 @@ class OracleTest(unittest.TestCase):
 
     def test_oracle_three_qubits_4(self):
         self.run_circuit_for_oracle(['000', '100', '101', '001'])
-        
+
 
     def test_oracle_three_qubits_5(self):
         self.run_circuit_for_oracle(['000', '001', '010', '011', '100', '101', '110', '111'])
