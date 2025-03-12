@@ -1,6 +1,7 @@
 import unittest
 
 from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit
+from qiskit_aer.library import save_statevector
 import numpy as np
 
 
@@ -39,10 +40,9 @@ class CPHByZeroVecTest(unittest.TestCase):
             circuit.initialize(bitstring, input_register)
 
             conditional_phase_shift_by_zero_vec(circuit, input_register, ancilla_register)
-            circuit.save_statevector()
+            save_statevector(circuit)
 
             self.run_circuit_and_assert_correct_conditional_phaseshift(circuit, bitstring)
-
 
 
     def test_cph_by_zero_vec_three_qubits(self):
@@ -54,7 +54,7 @@ class CPHByZeroVecTest(unittest.TestCase):
             circuit.initialize(bitstring, input_register)
 
             conditional_phase_shift_by_zero_vec(circuit, input_register, ancilla_register)
-            circuit.save_statevector()
+            save_statevector(circuit)
 
             self.run_circuit_and_assert_correct_conditional_phaseshift(circuit, bitstring)
 
@@ -68,10 +68,9 @@ class CPHByZeroVecTest(unittest.TestCase):
             circuit.initialize(bitstring, input_register)
 
             conditional_phase_shift_by_zero_vec(circuit, input_register, ancilla_register)
-            circuit.save_statevector()
+            save_statevector(circuit)
 
             self.run_circuit_and_assert_correct_conditional_phaseshift(circuit, bitstring)
-
 
 
     def test_cph_by_zero_vec_five_qubits(self):
@@ -83,6 +82,6 @@ class CPHByZeroVecTest(unittest.TestCase):
             circuit.initialize(bitstring, input_register)
 
             conditional_phase_shift_by_zero_vec(circuit, input_register, ancilla_register)
-            circuit.save_statevector()
+            save_statevector(circuit)
 
             self.run_circuit_and_assert_correct_conditional_phaseshift(circuit, bitstring)

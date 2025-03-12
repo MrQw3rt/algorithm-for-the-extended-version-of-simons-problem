@@ -1,6 +1,7 @@
 import unittest
 
 from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit
+from qiskit_aer.library import save_statevector
 import numpy as np
 
 from utils import run_circuit_without_measurement
@@ -41,7 +42,7 @@ class CPHByIndexTest(unittest.TestCase):
 
                 conditional_phase_shift_by_index(circuit, input_register, ancilla_register, index)
 
-                circuit.save_statevector()
+                save_statevector(circuit)
                 self.run_circuit_and_assert_correct_conditional_phaseshift(
                     circuit, bitstring, index
                 )
@@ -59,7 +60,7 @@ class CPHByIndexTest(unittest.TestCase):
 
                 conditional_phase_shift_by_index(circuit, input_register, ancilla_register, index)
 
-                circuit.save_statevector()
+                save_statevector(circuit)
                 self.run_circuit_and_assert_correct_conditional_phaseshift(
                     circuit, bitstring, index
                 )
@@ -77,7 +78,7 @@ class CPHByIndexTest(unittest.TestCase):
 
                 conditional_phase_shift_by_index(circuit, input_register, ancilla_register, index)
 
-                circuit.save_statevector()
+                save_statevector(circuit)
                 self.run_circuit_and_assert_correct_conditional_phaseshift(
                     circuit, bitstring, index
                 )
