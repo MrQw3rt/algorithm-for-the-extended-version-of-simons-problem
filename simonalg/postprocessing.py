@@ -1,22 +1,38 @@
-from sympy.polys.matrices import DM
-from sympy import GF
+"""
+Contains functionality to convert the vectors sampled by the quantum part of Simon's algorithm
+into a basis for the hidden subgroup.
+"""
 
 from functools import reduce
 
+from sympy.polys.matrices import DM
+from sympy import GF
+
 
 def bitstrings_to_vectors(bitstrings):
+    """
+    Converts the list of bitstrings into a list of numerical vectors.
+    """
     def bitstring_to_vector(bitstring):
         return reduce(lambda a,b: a + [1 if b == '1' else 0], bitstring, [])
     return [bitstring_to_vector(b) for b in bitstrings]
 
 
-def vectors_to_bitstrings(results):
-    return [reduce(lambda acc, bit: acc + f'{bit}', list(r), '') for r in results.tolist()]
+def vectors_to_bitstrings(vectors):
+    """
+    Converts the list of numerical vectors into a list of bitstrings.
+    """
+    return [reduce(lambda acc, bit: acc + f'{bit}', list(r), '') for r in vectors.tolist()]
 
 
 def get_basis_of_nullspace_mod_2(basis_elements):
-    A = DM(basis_elements, GF(2))
-    return A.nullspace().to_Matrix()
+    """
+    Parameters:
+        - basis_elements is a list of numerical vectors.
+    Interprets the basis_elements as rows of a matrix and returns the kernel of that matrix.
+    """
+    parity_check_matrix = DM(basis_elements, GF(2))
+    return parity_check_matrix.nullspace().to_Matrix()
 
 
 def convert_to_basis_of_hidden_subgroup(orthogonal_subgroup_basis, n):
@@ -31,15 +47,5 @@ def convert_to_basis_of_hidden_subgroup(orthogonal_subgroup_basis, n):
         orthogonal_subgroup_basis = ['0' * n]
     numerical_vectors = bitstrings_to_vectors(orthogonal_subgroup_basis)
 
-    """
-    The matrix where numerical_vectors are the columns is the generator matrix of the linear code specified 
-    the orthogonal subgroup. Hence, the transpose of that matrix, A, is the parity check matrix of the corresponding
-    dual code, which is the code specified by the hidden subgroup itself.
-    """
-    A = DM(numerical_vectors, GF(2))
-    """
-    By definition of the parity check matrix, its kernel forms a basis of the underlying code.
-    Hence, the kernel of A is the basis of the hidden subgroup.
-    """
-    hidden_subgroup_basis = A.nullspace().to_Matrix()
+    hidden_subgroup_basis = get_basis_of_nullspace_mod_2(numerical_vectors)
     return vectors_to_bitstrings(hidden_subgroup_basis)
