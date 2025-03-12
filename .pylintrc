@@ -1,0 +1,4 @@
+[PER-FILE-IGNORES]
+test/*.py: C0114
+test/*.py: C0115
+test/*.py: C0116
