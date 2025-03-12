@@ -1,17 +1,30 @@
+"""
+Contains the SimonCircuit class, which capsules functionality for generating the circuits needed
+for the implementation of Simon's algorithm.
+"""
+
 from functools import reduce
 
 from .utils.circuit import CircuitWrapper, conditional_phase_shift_by_zero_vec_entire_register
 
 
 class SimonCircuit():
+    """
+    Capsules functionality for generating the circuits for the implementation of Simon's algorithm.
+    """
     def __init__(self, oracle, custom_output_register_size=None, custom_ancilla_register_size=None):
         self._oracle = oracle
-        self.circuit_wrapper = CircuitWrapper(self._oracle._hidden_subgroup, custom_output_register_size=custom_output_register_size, custom_ancilla_register_size=custom_ancilla_register_size)
+        self.circuit_wrapper = CircuitWrapper(
+            self._oracle._hidden_subgroup,
+            custom_output_register_size=custom_output_register_size,
+            custom_ancilla_register_size=custom_ancilla_register_size
+        )
 
 
     def generate_standard_simon_circuit(self):
         """
-        Generates the quantum circuit proposed by Simon in https://epubs.siam.org/doi/abs/10.1137/S0097539796298637.
+        Generates the quantum circuit proposed by Simon in 
+        https://epubs.siam.org/doi/abs/10.1137/S0097539796298637.
         """
         input_register = self.circuit_wrapper.input_register
 
@@ -29,29 +42,36 @@ class SimonCircuit():
     def add_blocking_clauses(self, blockingclauses):
         """
         Parameters:
-            - blockingclauses are tuples of the form (bitstring, j) where bitstring is the bistring we would like to
-              remove from a superposition and j is the index where bitstring is 1 according to Lemma 6 of
-              https://ieeexplore.ieee.org/abstract/document/595153. bitstring is assumed to be of equal length as
-              the bitstrings of the oracle's hidden subgroup.
-        Modifies the circuit according to https://ieeexplore.ieee.org/abstract/document/595153, Lemma 7.
+            - blockingclauses are tuples of the form (bitstring, j) where bitstring is the bistring
+              we would like to remove from a superposition and j is the index where bitstring is 1 
+              according to Lemma 6 of https://ieeexplore.ieee.org/abstract/document/595153. 
+              bitstring is assumed to be of equal length as the bitstrings of the oracle's hidden 
+              subgroup.
+        Modifies the circuit according to https://ieeexplore.ieee.org/abstract/document/595153, 
+        Lemma 7.
         """
-        blockingclause_circuits = [self.generate_blockingclause_circuit(bitstring, blocking_index) for blocking_index, bitstring in enumerate(blockingclauses)]
+        blockingclause_circuits = [self.generate_blockingclause_circuit(bitstring, blocking_index)
+            for blocking_index, bitstring in enumerate(blockingclauses)]
         return self._compose_circuits(blockingclause_circuits)
 
 
     def generate_blockingclause_circuit(self, blockingclause, blocking_index):
         """
         Parameters:
-            - blockingclause is a tuple of the form (bitstring, j) where bitstring is the bistring we would like to
-              remove from a superposition and j is the index where bitstring is 1 according to Lemma 6 of
-              https://ieeexplore.ieee.org/abstract/document/595153. bitstring is assumed to be of equal length as
-              the bitstrings of the oracle's hidden subgroup.
-            - blocking_index is a technical parameter specifying which control qubit from the blockingclause_register
-              to use.
-        Modifies the circuit according to https://ieeexplore.ieee.org/abstract/document/595153, Lemma 6.
+            - blockingclause is a tuple of the form (bitstring, j) where bitstring is the bistring
+              we would like to remove from a superposition and j is the index where bitstring is 1 
+              according to Lemma 6 of https://ieeexplore.ieee.org/abstract/document/595153. 
+              bitstring is assumed to be of equal length as the bitstrings of the oracle's hidden 
+              subgroup.
+            - blocking_index is a technical parameter specifying which control qubit from the 
+              blockingclause_register to use.
+        Modifies the circuit according to https://ieeexplore.ieee.org/abstract/document/595153,
+        Lemma 6.
         """
         bitstring, j = blockingclause
-        indices_where_bitstring_is_1 = list(filter(lambda i: bitstring[i] == '1', range(len(bitstring))))
+        indices_where_bitstring_is_1 = list(
+            filter(lambda i: bitstring[i] == '1', range(len(bitstring)))
+        )
 
         circuit = self.circuit_wrapper.generate_new_circuit()
         input_register, _, blockingclause_register, _ = self.circuit_wrapper.get_registers()
@@ -70,18 +90,20 @@ class SimonCircuit():
     def generate_remove_zero_circuit(self, bitstrings, index):
         """
         Parameters:
-            - bitstrings are the bitstrings we already measured and would like to not measure again. All elements
-              are assumed to be non-zero and of equal length as the bitstrings of the oracle's hidden subgroup.
-            - index specifies which states to mark for amplitude amplification. All states with a 1 at index are
-              'good' states and the rest are the 'bad' states. We assume 0 <= index < len(bitstring) for each bitstring
-              in bitstrings.
-        Implements the quantum algorithm Q_i from https://ieeexplore.ieee.org/abstract/document/595153, Theorem 4.
+            - bitstrings are the bitstrings we already measured and would like to not measure 
+              again. All elements are assumed to be non-zero and of equal length as the bitstrings 
+              of the oracle's hidden subgroup.
+            - index specifies which states to mark for amplitude amplification. All states with a 
+              1 at index are 'good' states and the rest are the 'bad' states. We assume 
+              0 <= index < len(bitstring) for each bitstring in bitstrings.
+        Implements the quantum algorithm Q_i from 
+        https://ieeexplore.ieee.org/abstract/document/595153, Theorem 4.
         """
         def generate_forward_circuit():
             standard_simon_circuit = self.generate_standard_simon_circuit()
             blockingclause_circuit = self.add_blocking_clauses(bitstrings)
             return self._compose_circuits([standard_simon_circuit, blockingclause_circuit])
-        
+
         first_forward_circuit = generate_forward_circuit()
         first_forward_circuit.save_statevector(label='1_forward')
 
@@ -96,7 +118,7 @@ class SimonCircuit():
 
         second_forward_circuit = generate_forward_circuit()
         second_forward_circuit.save_statevector(label='5_final_forward')
-         
+
         return self._compose_circuits([
             first_forward_circuit,
             phaseshift_by_index_circuit,
@@ -104,7 +126,7 @@ class SimonCircuit():
             phaseshift_by_all_zero_vec_circuit,
             second_forward_circuit
         ])
-    
+
 
     def generate_phaseshift_by_index_circuit(self, index):
         """
@@ -125,10 +147,13 @@ class SimonCircuit():
         the all-zero bitstring.
         """
         circuit = self.circuit_wrapper.generate_new_circuit()
-        input_register, output_register, blockingclause_register, ancilla_register = self.circuit_wrapper.get_registers()
-        
+        registers = self.circuit_wrapper.get_registers()
+        input_register, output_register, blockingclause_register, ancilla_register = registers
+
         working_registers = [input_register, output_register, blockingclause_register]
-        conditional_phase_shift_by_zero_vec_entire_register(circuit, working_registers, ancilla_register)
+        conditional_phase_shift_by_zero_vec_entire_register(
+            circuit, working_registers, ancilla_register
+        )
 
         return circuit
 
@@ -137,7 +162,9 @@ class SimonCircuit():
         """
         Parameters:
             - circuits is a list of circuits which we want to compose.
-        Returns a quantum circuit that is composed of the quantum circuits in circuits. The circuits get
-        concatenated in the order in which they are inserted in the list.
+        Returns a quantum circuit that is composed of the quantum circuits in circuits. The circuits 
+        get concatenated in the order in which they are inserted in the list.
         """
-        return reduce(lambda a,b: a.compose(b), circuits, self.circuit_wrapper.generate_new_circuit())
+        def compose(a, b):
+            return a.compose(b)
+        return reduce(compose, circuits, self.circuit_wrapper.generate_new_circuit())
