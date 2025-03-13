@@ -33,7 +33,9 @@ class SimonCircuit():
         hadamard_circuit_1 = self.circuit_wrapper.generate_new_circuit()
         hadamard_circuit_1.h(input_register)
 
+        hadamard_circuit_1.barrier(label='start_of_oracle')
         oracle_circuit = self._oracle.generate_circuit(self.circuit_wrapper)
+        oracle_circuit.barrier(label='end_of_oracle')
 
         hadamard_circuit_2 = self.circuit_wrapper.generate_new_circuit()
         hadamard_circuit_2.h(input_register)
@@ -54,6 +56,8 @@ class SimonCircuit():
         """
         blockingclause_circuits = [self.generate_blockingclause_circuit(bitstring, blocking_index)
             for blocking_index, bitstring in enumerate(blockingclauses)]
+        for circuit in blockingclause_circuits[:-1]:
+            circuit.barrier()
         return self._compose_circuits(blockingclause_circuits)
 
 
@@ -109,7 +113,9 @@ class SimonCircuit():
         """
         def generate_forward_circuit():
             standard_simon_circuit = self.generate_standard_simon_circuit()
+            standard_simon_circuit.barrier(label='start_of_blockingclauses')
             blockingclause_circuit = self.add_blocking_clauses(blockingclauses)
+            blockingclause_circuit.barrier(label='end_of_blockingclauses')
             return self._compose_circuits([standard_simon_circuit, blockingclause_circuit])
 
         first_forward_circuit = generate_forward_circuit()

@@ -46,12 +46,15 @@ class DefaultOracle:
             indices_where_output_should_be_1 = filter(filter_fn, range(output_register.size))
             target_qubits = [output_register[i] for i in indices_where_output_should_be_1]
 
-            for bitstring in coset:
+            is_last_coset = c_index == len(cosets) - 2
+            for i,bitstring in enumerate(coset):
                 x_gate_where_bitstring_is_0(circuit, input_register, bitstring)
                 optimized_mcx(circuit, input_register, ancilla_register, target_qubits)
                 x_gate_where_bitstring_is_0(circuit, input_register, bitstring)
 
-                circuit.barrier()
+                is_last_bitstring = i == len(coset) - 1
+                if  (not is_last_coset) or (not is_last_bitstring):
+                    circuit.barrier()
 
         return circuit
 
