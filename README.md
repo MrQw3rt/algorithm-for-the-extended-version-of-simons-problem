@@ -56,8 +56,6 @@ oracle = DefaultOracle(hidden_subgroup)
 
 solver = SimonSolver(SimonCircuit(oracle), AerSimulator())
 hidden_subgroup_basis = solver.solve()
-
-print(hidden_subgroup_basis)
 ```
 * The `hidden_subgroup` is given as a list of bitstrings. It is assumed that **all** bitstrings that make up the hidden subgroup are contained in the list. Use the `expand_group` method from the `simonalg.utils.grouptheory` module if you only want to specify a generating set.
 * The `DefaultOracle` class automatically constructs a quantum circuit that implements a valid oracle for the hidden subgroup. For a guide on how to program your own oracle implementation, refer to [here](#oracles).
@@ -157,7 +155,6 @@ simon_circuit = SimonCircuit(SimpleOracle(hidden_subgroup), custom_output_regist
 solver = SimonSolver(simon_circuit, AerSimulator())
 
 hidden_subgroup_basis = solver.solve()
-print(hidden_subgroup_basis)
 ```
 
 ## Logging
