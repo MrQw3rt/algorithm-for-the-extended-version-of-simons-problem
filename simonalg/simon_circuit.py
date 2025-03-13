@@ -89,21 +89,27 @@ class SimonCircuit():
         return circuit
 
 
-    def generate_remove_zero_circuit(self, bitstrings, index, for_aer_simulator=False):
+    def generate_remove_zero_circuit(self, blockingclauses, index, for_aer_simulator=False):
         """
         Parameters:
-            - bitstrings are the bitstrings we already measured and would like to not measure 
-              again. All elements are assumed to be non-zero and of equal length as the bitstrings 
-              of the oracle's hidden subgroup.
+            - blockingclauses are tuples of the form (bitstring, j) where bitstring is the bistring
+              we would like to remove from a superposition and j is the index where bitstring is 1 
+              according to Lemma 6 of https://ieeexplore.ieee.org/abstract/document/595153. 
+              bitstring is assumed to be of equal length as the bitstrings of the oracle's hidden 
+              subgroup.
             - index specifies which states to mark for amplitude amplification. All states with a 
               1 at index are 'good' states and the rest are the 'bad' states. We assume 
               0 <= index < len(bitstring) for each bitstring in bitstrings.
+            - for_aer_simulator is a technical parameter used for testing/debugging. If set to True,
+              after each amplitude amplification step, the statevector will be logged. This is only
+              available when using the AER-Simulator and does not work with any 'productive' 
+              backend.
         Implements the quantum algorithm Q_i from 
         https://ieeexplore.ieee.org/abstract/document/595153, Theorem 4.
         """
         def generate_forward_circuit():
             standard_simon_circuit = self.generate_standard_simon_circuit()
-            blockingclause_circuit = self.add_blocking_clauses(bitstrings)
+            blockingclause_circuit = self.add_blocking_clauses(blockingclauses)
             return self._compose_circuits([standard_simon_circuit, blockingclause_circuit])
 
         first_forward_circuit = generate_forward_circuit()

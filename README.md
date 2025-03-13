@@ -174,3 +174,4 @@ log.setLevel('DEBUG')
 ```
 * **Attention** most quantum circuits will be wider than your terminal and won't be displayed correctly there. I recommend piping logs containing quantum circuits into a text file, since
   there everything will be formatted correctly.
+* The quantum circuits that get logged contain barriers for better visual representation. Those barriers get removed before the circuits are transpiled and thus have no effect on the algorithm.
