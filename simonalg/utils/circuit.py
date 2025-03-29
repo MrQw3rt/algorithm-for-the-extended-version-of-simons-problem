@@ -7,7 +7,7 @@ needed in the extended version of Simon's algorithm.
 import math
 from functools import reduce
 
-from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit
+from qiskit import QuantumRegister, QuantumCircuit
 
 
 class CircuitWrapper():
@@ -52,7 +52,7 @@ class CircuitWrapper():
             input_register_size, output_register_size, blockingclause_register_size, -1
         ])
         ancilla_register_size = custom_ancilla_register_size or default_ancilla_register_size
-        self.ancilla_register = AncillaRegister(ancilla_register_size, 'anc')
+        self.ancilla_register = QuantumRegister(ancilla_register_size, 'anc')
 
 
     def get_registers(self):
