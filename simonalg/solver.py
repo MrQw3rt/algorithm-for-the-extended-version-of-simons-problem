@@ -7,8 +7,13 @@ from qiskit import ClassicalRegister, transpile
 from qiskit.transpiler.passes import RemoveBarriers
 from qiskit_ibm_runtime import SamplerV2
 
-from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup, verify_linear_independence
+from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup
 from simonalg.utils.logging import log
+
+
+class ValidationException(Exception):
+    pass
+
 
 class SimonSolver:
     """
@@ -16,12 +21,12 @@ class SimonSolver:
     Contains implementations for Theorem 4 and Theorem 5 of 
     https://ieeexplore.ieee.org/abstract/document/595153.
     """
-    def __init__(self, simon_circuit, backend, check_linear_independence=False):
+    def __init__(self, simon_circuit, backend, validate_new_elements=True):
         """
         Parameters:
             - simon_circuit an instance of the SimonCircuit class.
             - backend is the Qiskit backend on which the generated circuits are to be run.
-            - check_linear_independence set this to True if you want to check whether
+            - validate_new_elements set this to True if you want to check whether
               all bitstrings sampled by the quantum routine are linearly independent after
               each quantum circuit run. Intended to be used when testing on noisy NISQ hardware.
               If sampled vectors are not linearly independent, an exception is thrown and the
@@ -31,7 +36,7 @@ class SimonSolver:
         self._backend = backend
         self._n = len(simon_circuit.circuit_wrapper.input_register)
         self._zerovec = '0' * self._n
-        self._check_linear_independence = check_linear_independence
+        self._validate_new_elements = validate_new_elements
 
 
     def _run_circuit(self, circuit, input_register):
@@ -62,6 +67,23 @@ class SimonSolver:
             lambda index: index not in blocked_indices, register_indices_where_element_is_1
         ))
         return free_register_indices_where_element_is_1[-1]
+
+
+    def _validate_new_element(self, new_element, blocked_indices):
+        is_zero_on_all_blocked_indices = all(
+            new_element[self._n - 1 - bi] == '0' for bi in blocked_indices
+        )
+        if is_zero_on_all_blocked_indices:
+            return
+
+        log.error(
+                'Measured an element that should have been blocked. '
+                'This is most likely due to a noisy quantum backend. Aborting the algorithm.'
+            )
+        raise ValidationException(
+            f'Bitstring {new_element} was measured despite '
+            'blocked indices {blocked_indices}.'
+        )
 
 
     def get_new_orthogonal_subgroup_element(self, y=None, blocked_indices=None):
@@ -97,6 +119,9 @@ class SimonSolver:
 
             new_element = self._get_most_probable_result(quantum_result)
             log.info('Picked the quantum result with highest count: %s', new_element)
+            if self._validate_new_elements:
+                self._validate_new_element(new_element, blocked_indices)
+
             blocked_indices.add(i)
             log.info('Added index %d to blocked indices', i)
 
@@ -134,8 +159,6 @@ class SimonSolver:
             )
             if orthogonal_subgroup_element != self._zerovec:
                 y.append(orthogonal_subgroup_element)
-                if self._check_linear_independence:
-                    verify_linear_independence([s[0] for s in y])
             else:
                 done = True
         return [y[0] for y in y]
@@ -147,7 +170,12 @@ class SimonSolver:
         https://ieeexplore.ieee.org/abstract/document/595153.
         """
         log.info('[STARTED] Extended version of Simon\'s algorithm')
-        basis_of_orthogonal_subgroup = self.generate_basis_of_orthogonal_subgroup()
+        try:
+            basis_of_orthogonal_subgroup = self.generate_basis_of_orthogonal_subgroup()
+        except ValidationException:
+            log.error('[ABORTED]')
+            return None
+
         log.info('Basis of orthogonal subgroup is %s', basis_of_orthogonal_subgroup)
         basis_of_hidden_subgroup = convert_to_basis_of_hidden_subgroup(
             basis_of_orthogonal_subgroup, self._n

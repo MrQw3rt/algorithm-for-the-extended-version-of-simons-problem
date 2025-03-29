@@ -49,24 +49,3 @@ def convert_to_basis_of_hidden_subgroup(orthogonal_subgroup_basis, n):
 
     hidden_subgroup_basis = get_basis_of_nullspace_mod_2(numerical_vectors)
     return vectors_to_bitstrings(hidden_subgroup_basis)
-
-
-class LinearDependenceException(Exception):
-    pass
-
-
-def verify_linear_independence(bitstrings):
-    """
-    Parameters:
-        - bitstrings is a list of bitstrings.
-    Raises an error if bitstrings are not linearly independent.
-    """
-    numerical_vectors = bitstrings_to_vectors(bitstrings)
-    matrix = DM(numerical_vectors, GF(2))
-
-    rank = matrix.rank()
-    if rank != len(bitstrings):
-        raise LinearDependenceException(
-            f'The following bitstrings are linearly dependent: {bitstrings}'
-        )
-    
