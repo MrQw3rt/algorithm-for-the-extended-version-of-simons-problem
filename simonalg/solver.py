@@ -5,6 +5,7 @@ the algorithm from the proof of Theorem 5 in https://ieeexplore.ieee.org/abstrac
 
 from qiskit import ClassicalRegister, transpile
 from qiskit.transpiler.passes import RemoveBarriers
+from qiskit_ibm_runtime import SamplerV2
 
 from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup, verify_linear_independence
 from simonalg.utils.logging import log
@@ -34,16 +35,15 @@ class SimonSolver:
 
 
     def _run_circuit(self, circuit, input_register):
-        classical_register = ClassicalRegister(input_register.size)
+        classical_register = ClassicalRegister(input_register.size, 'measurements')
         circuit.add_register(classical_register)
         for i in range(input_register.size):
             circuit.measure(input_register[i], classical_register[i])
 
         remove_barriers = RemoveBarriers()
         transpiled_circuit = transpile(remove_barriers(circuit), self._backend)
-        result = self._backend.run(transpiled_circuit).result()
-
-        return result.get_counts(transpiled_circuit)
+        job = SamplerV2(self._backend).run([transpiled_circuit], shots=1024)
+        return job.result()[0].data.measurements.get_counts()
 
 
     def _get_most_probable_result(self, quantum_result):
