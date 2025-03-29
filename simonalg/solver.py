@@ -6,7 +6,7 @@ the algorithm from the proof of Theorem 5 in https://ieeexplore.ieee.org/abstrac
 from qiskit import ClassicalRegister, transpile
 from qiskit.transpiler.passes import RemoveBarriers
 
-from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup
+from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup, verify_linear_independence
 from simonalg.utils.logging import log
 
 class SimonSolver:
@@ -15,11 +15,22 @@ class SimonSolver:
     Contains implementations for Theorem 4 and Theorem 5 of 
     https://ieeexplore.ieee.org/abstract/document/595153.
     """
-    def __init__(self, simon_circuit, backend):
+    def __init__(self, simon_circuit, backend, check_linear_independence=False):
+        """
+        Parameters:
+            - simon_circuit an instance of the SimonCircuit class.
+            - backend is the Qiskit backend on which the generated circuits are to be run.
+            - check_linear_independence set this to True if you want to check whether
+              all bitstrings sampled by the quantum routine are linearly independent after
+              each quantum circuit run. Intended to be used when testing on noisy NISQ hardware.
+              If sampled vectors are not linearly independent, an exception is thrown and the
+              solver aborts.
+        """
         self._simon_circuit = simon_circuit
         self._backend = backend
         self._n = len(simon_circuit.circuit_wrapper.input_register)
         self._zerovec = '0' * self._n
+        self._check_linear_independence = check_linear_independence
 
 
     def _run_circuit(self, circuit, input_register):
@@ -123,6 +134,8 @@ class SimonSolver:
             )
             if orthogonal_subgroup_element != self._zerovec:
                 y.append(orthogonal_subgroup_element)
+                if self._check_linear_independence:
+                    verify_linear_independence([s[0] for s in y])
             else:
                 done = True
         return [y[0] for y in y]
