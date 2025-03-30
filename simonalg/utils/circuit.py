@@ -7,7 +7,8 @@ needed in the extended version of Simon's algorithm.
 import math
 from functools import reduce
 
-from qiskit import QuantumRegister, QuantumCircuit
+from qiskit import QuantumRegister, QuantumCircuit, transpile
+from qiskit.transpiler.passes import RemoveBarriers
 
 
 class CircuitWrapper():
@@ -246,3 +247,8 @@ def conditional_phase_shift_by_zero_vec_entire_register(circuit, registers, anci
     virtual_input_register = list(reduce(lambda a,b: append_qubits(b, a), registers, []))
 
     conditional_phase_shift_by_zero_vec(circuit, virtual_input_register, ancilla_register)
+
+
+def remove_barriers_and_transpile_for_backend(circuit, backend):
+    circuit_without_barriers = RemoveBarriers()(circuit)
+    return transpile(circuit_without_barriers, backend)

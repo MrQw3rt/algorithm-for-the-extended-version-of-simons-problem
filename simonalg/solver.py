@@ -3,12 +3,12 @@ Contains the SimonSolver class, the 'solve' method of which implements
 the algorithm from the proof of Theorem 5 in https://ieeexplore.ieee.org/abstract/document/595153.
 """
 
-from qiskit import ClassicalRegister, transpile
-from qiskit.transpiler.passes import RemoveBarriers
+from qiskit import ClassicalRegister
 from qiskit_ibm_runtime import SamplerV2
 
 from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup
 from simonalg.utils.logging import log
+from simonalg.utils.circuit import remove_barriers_and_transpile_for_backend
 
 
 class ValidationException(Exception):
@@ -45,8 +45,7 @@ class SimonSolver:
         for i in range(input_register.size):
             circuit.measure(input_register[i], classical_register[i])
 
-        remove_barriers = RemoveBarriers()
-        transpiled_circuit = transpile(remove_barriers(circuit), self._backend)
+        transpiled_circuit = remove_barriers_and_transpile_for_backend(circuit, self._backend)
         job = SamplerV2(self._backend).run([transpiled_circuit], shots=1024)
         return job.result()[0].data.measurements.get_counts()
 
