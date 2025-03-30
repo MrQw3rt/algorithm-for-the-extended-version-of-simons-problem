@@ -4,7 +4,6 @@ the algorithm from the proof of Theorem 5 in https://ieeexplore.ieee.org/abstrac
 """
 
 from qiskit import ClassicalRegister
-from qiskit_ibm_runtime import SamplerV2
 
 from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup
 from simonalg.utils.logging import log
@@ -21,11 +20,12 @@ class SimonSolver:
     Contains implementations for Theorem 4 and Theorem 5 of 
     https://ieeexplore.ieee.org/abstract/document/595153.
     """
-    def __init__(self, simon_circuit, backend, validate_new_elements=True):
+    def __init__(self, simon_circuit, sampler, validate_new_elements=True):
         """
         Parameters:
             - simon_circuit an instance of the SimonCircuit class.
-            - backend is the Qiskit backend on which the generated circuits are to be run.
+            - sampler is a wrapper around the Qiskit backend to run circuits on. Have a look at
+              https://docs.quantum.ibm.com/api/qiskit-ibm-runtime/sampler-v2 for more details.
             - validate_new_elements set this to True if you want to check whether
               all bitstrings sampled by the quantum routine are linearly independent after
               each quantum circuit run. Intended to be used when testing on noisy NISQ hardware.
@@ -33,7 +33,7 @@ class SimonSolver:
               solver aborts.
         """
         self._simon_circuit = simon_circuit
-        self._backend = backend
+        self._sampler = sampler
         self._n = len(simon_circuit.circuit_wrapper.input_register)
         self._zerovec = '0' * self._n
         self._validate_new_elements = validate_new_elements
@@ -45,8 +45,9 @@ class SimonSolver:
         for i in range(input_register.size):
             circuit.measure(input_register[i], classical_register[i])
 
-        transpiled_circuit = remove_barriers_and_transpile_for_backend(circuit, self._backend)
-        job = SamplerV2(self._backend).run([transpiled_circuit], shots=1024)
+        backend = self._sampler.backend()
+        transpiled_circuit = remove_barriers_and_transpile_for_backend(circuit, backend)
+        job = self._sampler.run([transpiled_circuit])
         return job.result()[0].data.measurements.get_counts()
 
 

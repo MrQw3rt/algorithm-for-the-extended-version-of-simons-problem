@@ -1,6 +1,8 @@
 import unittest
 
 from qiskit_aer import AerSimulator
+from qiskit_ibm_runtime import SamplerV2
+
 
 from simonalg.oracle import DefaultOracle, CosetRepresentativeOracle
 from simonalg.simon_circuit import SimonCircuit
@@ -18,7 +20,7 @@ class SimonSolverTest(unittest.TestCase):
 
         solver = SimonSolver(
             SimonCircuit(oracle, custom_output_register_size=custom_output_register_size),
-            AerSimulator()
+            SamplerV2(AerSimulator())
         )
         recovered_hidden_subgroup = expand_group(solver.solve(), len(hidden_subgroup[0]))
         recovered_hidden_subgroup.sort()
