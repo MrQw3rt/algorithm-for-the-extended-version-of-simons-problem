@@ -1,6 +1,7 @@
 import unittest
 
-from utils import run_circuit
+from utils import run_circuit_on_simulator
+
 from simonalg.oracle import DefaultOracle
 from simonalg.utils.grouptheory import generate_group_by_order, generate_cosets_for_subgroup
 from simonalg.utils.circuit import CircuitWrapper
@@ -23,8 +24,8 @@ class OracleTest(unittest.TestCase):
             oracle = DefaultOracle(hidden_subgroup)
             oracle_circuit = oracle.generate_circuit(circuit_wrapper)
 
-            result = run_circuit(
-                init_circuit.compose(oracle_circuit), 
+            result = run_circuit_on_simulator(
+                 init_circuit.compose(oracle_circuit),
                 [input_register, output_register, blockingclause_register, ancilla_register]
             )
 
@@ -32,6 +33,8 @@ class OracleTest(unittest.TestCase):
             register_states = list(result.keys())[0]
 
             res_in, res_out, res_bc, res_an = register_states.split(' ')
+            #[res_in, res_out, res_bc, res_an] = result
+
             self.assertEqual(res_in, bitstring)
             self.assertEqual(res_bc, '0' * len(blockingclause_register))
             self.assertEqual(res_an, '0' * len(ancilla_register))

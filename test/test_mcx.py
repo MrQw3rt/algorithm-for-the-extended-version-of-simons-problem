@@ -3,7 +3,7 @@ from itertools import takewhile
 
 from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit
 
-from utils import run_circuit
+from utils import run_circuit_on_simulator
 from simonalg.utils.grouptheory import generate_group_by_order
 from simonalg.utils.circuit import mcx_halfchain, reverse_mcx_halfchain, optimized_mcx
 
@@ -88,7 +88,7 @@ class CustomMCXTest(unittest.TestCase):
 
             mcx_halfchain(circuit, input_register, ancilla_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register])
             self.assert_correct_halfchain(result)
 
 
@@ -102,7 +102,7 @@ class CustomMCXTest(unittest.TestCase):
 
             mcx_halfchain(circuit, input_register, ancilla_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register])
             self.assert_correct_halfchain(result)
 
 
@@ -115,7 +115,7 @@ class CustomMCXTest(unittest.TestCase):
 
             mcx_halfchain(circuit, input_register, ancilla_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register])
             self.assert_correct_halfchain(result)
 
 
@@ -128,7 +128,7 @@ class CustomMCXTest(unittest.TestCase):
 
             mcx_halfchain(circuit, input_register, ancilla_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register])
             self.assert_correct_halfchain(result)
 
 
@@ -170,7 +170,7 @@ class CustomMCXTest(unittest.TestCase):
             mcx_halfchain(circuit, input_register, ancilla_register)
             reverse_mcx_halfchain(circuit, input_register, ancilla_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register])
             self.assert_correct_reverse_halfchain(result, bitstring)
 
 
@@ -184,7 +184,7 @@ class CustomMCXTest(unittest.TestCase):
             mcx_halfchain(circuit, input_register, ancilla_register)
             reverse_mcx_halfchain(circuit, input_register, ancilla_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register])
             self.assert_correct_reverse_halfchain(result, bitstring)
 
 
@@ -198,7 +198,7 @@ class CustomMCXTest(unittest.TestCase):
             mcx_halfchain(circuit, input_register, ancilla_register)
             reverse_mcx_halfchain(circuit, input_register, ancilla_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register])
             self.assert_correct_reverse_halfchain(result, bitstring)
 
 
@@ -212,7 +212,7 @@ class CustomMCXTest(unittest.TestCase):
             mcx_halfchain(circuit, input_register, ancilla_register)
             reverse_mcx_halfchain(circuit, input_register, ancilla_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register])
             self.assert_correct_reverse_halfchain(result, bitstring)
 
 
@@ -226,7 +226,7 @@ class CustomMCXTest(unittest.TestCase):
 
             optimized_mcx(circuit, input_register, ancilla_register, output_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register, output_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register, output_register])
 
             self.assert_correct_optimized_mcx(result, bitstring)
 
@@ -241,7 +241,7 @@ class CustomMCXTest(unittest.TestCase):
 
             optimized_mcx(circuit, input_register, ancilla_register, output_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register, output_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register, output_register])
 
             self.assert_correct_optimized_mcx(result, bitstring)
 
@@ -256,7 +256,7 @@ class CustomMCXTest(unittest.TestCase):
 
             optimized_mcx(circuit, input_register, ancilla_register, output_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register, output_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register, output_register])
 
             self.assert_correct_optimized_mcx(result, bitstring)
 
@@ -271,7 +271,7 @@ class CustomMCXTest(unittest.TestCase):
 
             optimized_mcx(circuit, input_register, ancilla_register, output_register)
 
-            result = run_circuit(circuit, [input_register, ancilla_register, output_register])
+            result = run_circuit_on_simulator(circuit, [input_register, ancilla_register, output_register])
 
             self.assert_correct_optimized_mcx(result, bitstring)
             

@@ -3,11 +3,9 @@ Contains the SimonSolver class, the 'solve' method of which implements
 the algorithm from the proof of Theorem 5 in https://ieeexplore.ieee.org/abstract/document/595153.
 """
 
-from qiskit import ClassicalRegister
-
 from simonalg.postprocessing import convert_to_basis_of_hidden_subgroup
 from simonalg.utils.logging import log
-from simonalg.utils.circuit import remove_barriers_and_transpile_for_backend
+from simonalg.utils.circuit import run_circuit_and_measure_registers
 
 
 class ValidationException(Exception):
@@ -40,15 +38,7 @@ class SimonSolver:
 
 
     def _run_circuit(self, circuit, input_register):
-        classical_register = ClassicalRegister(input_register.size, 'measurements')
-        circuit.add_register(classical_register)
-        for i in range(input_register.size):
-            circuit.measure(input_register[i], classical_register[i])
-
-        backend = self._sampler.backend()
-        transpiled_circuit = remove_barriers_and_transpile_for_backend(circuit, backend)
-        job = self._sampler.run([transpiled_circuit])
-        return job.result()[0].data.measurements.get_counts()
+        return run_circuit_and_measure_registers(circuit, [input_register], self._sampler)
 
 
     def _get_most_probable_result(self, quantum_result):

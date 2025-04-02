@@ -1,6 +1,6 @@
 import unittest
 
-from utils import run_circuit
+from utils import run_circuit_on_simulator
 from simonalg.oracle import DefaultOracle
 from simonalg.simon_circuit import SimonCircuit
 from simonalg.utils.grouptheory import is_in_orthogonal_group
@@ -14,7 +14,7 @@ class SimonStandardTest(unittest.TestCase):
         circuit = simon_circuit.generate_standard_simon_circuit()
         registers = simon_circuit.circuit_wrapper.get_registers()
         input_register, _, blockingclause_register, ancilla_register = registers
-        result = run_circuit(circuit, [input_register, blockingclause_register, ancilla_register])
+        result = run_circuit_on_simulator(circuit, [input_register, blockingclause_register, ancilla_register])
 
         register_states = [k.split(' ') for k in result.keys()]
         for reg_tuple in register_states:
@@ -31,7 +31,7 @@ class SimonStandardTest(unittest.TestCase):
         circuit = simon_circuit.generate_standard_simon_circuit()
         registers = simon_circuit.circuit_wrapper.get_registers()
         input_register, output_register, blockingclause_register, ancilla_register = registers
-        result = run_circuit(
+        result = run_circuit_on_simulator(
             circuit.compose(circuit),
             [input_register, output_register, blockingclause_register, ancilla_register]
         )

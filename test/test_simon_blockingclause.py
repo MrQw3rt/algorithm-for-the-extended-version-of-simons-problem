@@ -1,6 +1,6 @@
 import unittest
 
-from utils import run_circuit
+from utils import run_circuit_on_simulator
 from simonalg.oracle import DefaultOracle
 from simonalg.simon_circuit import SimonCircuit
 from simonalg.utils.grouptheory import is_in_orthogonal_group
@@ -20,7 +20,7 @@ class SimonBlockingclauseTest(unittest.TestCase):
         blockingclauses_circuit = simon_circuit.add_blocking_clauses(blockingclauses)
 
         input_register, _, _, ancilla_register = simon_circuit.circuit_wrapper.get_registers()
-        result = run_circuit(
+        result = run_circuit_on_simulator(
             standard_circuit.compose(blockingclauses_circuit),
             [input_register, ancilla_register]
         )

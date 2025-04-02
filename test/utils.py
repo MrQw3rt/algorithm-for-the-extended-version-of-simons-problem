@@ -2,14 +2,16 @@ import unittest
 from functools import reduce
 
 import numpy as np
-from qiskit import ClassicalRegister, transpile
+from qiskit import transpile
 from qiskit_aer import AerSimulator
+from qiskit_ibm_runtime import SamplerV2
 
 from simonalg.oracle import DefaultOracle
 from simonalg.simon_circuit import SimonCircuit
 from simonalg.utils.grouptheory import generate_group_by_order, generate_orthogonal_group
 from simonalg.utils.grouptheory import is_in_orthogonal_group
 from simonalg.utils.logging import test_logger as log
+from simonalg.utils.circuit import run_circuit_and_measure_registers
 
 
 def log_parameters(params):
@@ -45,22 +47,15 @@ def log_statevectors(result, input_register, output_register):
     log.info('Statevectors:\n%s', res)
 
 
-def run_circuit(circuit, measured_registers):
-    # Reversed in order to preserve the register order in the output
-    for register in reversed(measured_registers):
-        classical_register = ClassicalRegister(register.size)
-        circuit.add_register(classical_register)
-        for i in range(register.size):
-            circuit.measure(register[i], classical_register[i])
-
-    simulator = AerSimulator()
-    transpiled_circuit = transpile(circuit, simulator)
-    result = simulator.run(transpiled_circuit).result()
-
-    return result.get_counts(transpiled_circuit)
+def run_circuit_on_simulator(circuit, measured_registers):
+    sampler = SamplerV2(AerSimulator())
+    return run_circuit_and_measure_registers(circuit, measured_registers, sampler)
 
 
 def run_circuit_without_measurement(circuit):
+    """
+    We keep this simulator part used for testing only on the pre-primitives API.
+    """
     simulator = AerSimulator()
     transpiled_circuit = transpile(circuit, simulator)
 
@@ -101,7 +96,7 @@ def construct_and_run_extended_simon_circuit(
         ('Blockingclauses are ', blockingclause_bitstrings)
     ] + ([('Generated Circuit\n', rmz_circuit)] if log_circuit else []))
 
-    result = run_circuit(rmz_circuit, [input_register])
+    result = run_circuit_on_simulator(rmz_circuit, [input_register])
     log.info('Results: %s', result)
 
     return list(result.keys())

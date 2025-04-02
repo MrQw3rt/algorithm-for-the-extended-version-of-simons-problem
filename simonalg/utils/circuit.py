@@ -7,7 +7,7 @@ needed in the extended version of Simon's algorithm.
 import math
 from functools import reduce
 
-from qiskit import QuantumRegister, QuantumCircuit, transpile
+from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit, transpile
 from qiskit.transpiler.passes import RemoveBarriers
 
 
@@ -250,5 +250,50 @@ def conditional_phase_shift_by_zero_vec_entire_register(circuit, registers, anci
 
 
 def remove_barriers_and_transpile_for_backend(circuit, backend):
+    """
+    Parameters:
+        - circuit the quantum circuit we want to remove all barriers on.
+        - backend the quantum computer backend we want to transpile the circuit for.
+    Returns a new quantum circuit transpiled for backend.
+    """
     circuit_without_barriers = RemoveBarriers()(circuit)
     return transpile(circuit_without_barriers, backend)
+
+
+def run_circuit_and_measure_registers(circuit, registers, sampler):
+    """
+    Parameters:
+        - circuit is the quantum circuit which we want to run.
+        - registers are the quantum registers, which we would like to measure.
+        - sampler is a SamplerV2 object used for running the circuit. Use this to
+          customize the quantum computer backend or other options like the number of shots.
+    Runs circuit on the backend referred to by sampler and returns the result of measuring
+    registers as a counts dict. In the counts dict, registers are separated by a whitespace
+    and registers are arranged in the order they are given in in the registers parameter.
+    """
+    total_measured_qubit_count = sum([len(r) for r in registers])
+    classical_register = ClassicalRegister(total_measured_qubit_count, 'measure')
+    circuit.add_register(classical_register)
+    creg_size = len(classical_register)
+
+    register_boundaries = []
+    offset = 0
+    for register in registers:
+        register_length = len(register)
+        register_boundaries.append((offset, offset + register_length))
+        for i in range(register.size):
+            circuit.measure(
+                register[i], classical_register[creg_size - 1 - offset - (register_length - 1 - i)]
+            )
+        offset += register_length
+
+    backend = sampler.backend()
+    transpiled_circuit = remove_barriers_and_transpile_for_backend(circuit, backend)
+    job = sampler.run([transpiled_circuit])
+
+    def split_into_registers(key, boundaries):
+        return ' '.join([key[b[0]:b[1]] for b in boundaries])
+
+    raw_result_data = job.result()[0].data.measure.get_counts()
+    return dict((split_into_registers(key, register_boundaries),raw_result_data[key])
+            for key in raw_result_data.keys())
