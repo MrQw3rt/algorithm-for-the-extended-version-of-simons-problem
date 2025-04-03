@@ -66,6 +66,16 @@ hidden_subgroup_basis = solver.solve()
 You can experiment with different hidden subgroups. You can of course also use Qiskit backends other than the `AerSimulator` from the example code. If you use a simulator, be aware that for $n \geq 4$, depending on your hardware, the simulations can get very slow, since the implementation requires many ancillary qubits.
 
 
+### Running Examples
+
+The folder `examples` contains several example scripts you can use as inspiration for your own experiments. To run an example from the project root folder run
+```shell
+(.venv) $ export PYTHONPATH=$(pwd)
+(.venv) $ python3 examples/example_aer_simulator
+```
+Note that for `example_ibm_sherbrooke.py` and for `example_ionq_aria_simulator.py` you need to configure an IBM Quantum or IonQ Cloud API key respectively.
+
+
 ## Writing your own Oracles
 
 
