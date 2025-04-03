@@ -8,5 +8,5 @@ from simonalg.solver import SimonSolver
 hidden_subgroup = ['000', '001', '010', '011']
 oracle = DefaultOracle(hidden_subgroup)
 
-solver = SimonSolver(SimonCircuit(oracle),  SamplerV2(AerSimulator()))
+solver = SimonSolver(SimonCircuit(oracle), sampler=SamplerV2(AerSimulator()))
 hidden_subgroup_basis = solver.solve()
