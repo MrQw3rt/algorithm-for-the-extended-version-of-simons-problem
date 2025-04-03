@@ -10,6 +10,8 @@ from functools import reduce
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit, transpile
 from qiskit.transpiler.passes import RemoveBarriers
 
+from simonalg.utils.logging import log
+
 
 class CircuitWrapper():
     """
@@ -260,21 +262,19 @@ def remove_barriers_and_transpile_for_backend(circuit, backend):
     return transpile(circuit_without_barriers, backend)
 
 
-def run_circuit_and_measure_registers(circuit, registers, sampler):
+def add_measurements_to_circuit(circuit, registers):
     """
     Parameters:
-        - circuit is the quantum circuit which we want to run.
-        - registers are the quantum registers, which we would like to measure.
-        - sampler is a SamplerV2 object used for running the circuit. Use this to
-          customize the quantum computer backend or other options like the number of shots.
-    Runs circuit on the backend referred to by sampler and returns the result of measuring
-    registers as a counts dict. In the counts dict, registers are separated by a whitespace
-    and registers are arranged in the order they are given in in the registers parameter.
+        - circuits is the quantum circuit for which we want to add measurement operations.
+        - registers are the circuit registers which we want to measure.
+    Constructs one large classical register onto which all specified quantum registers are
+    measured. Returns the modified circuit as well as the register_boundaries list which
+    keeps track of which quantum register is mapped to which part of the classical register.
     """
-    total_measured_qubit_count = sum([len(r) for r in registers])
+    total_measured_qubit_count = sum(len(r) for r in registers)
     classical_register = ClassicalRegister(total_measured_qubit_count, 'measure')
-    circuit.add_register(classical_register)
     creg_size = len(classical_register)
+    circuit.add_register(classical_register)
 
     register_boundaries = []
     offset = 0
@@ -287,13 +287,54 @@ def run_circuit_and_measure_registers(circuit, registers, sampler):
             )
         offset += register_length
 
-    backend = sampler.backend()
-    transpiled_circuit = remove_barriers_and_transpile_for_backend(circuit, backend)
-    job = sampler.run([transpiled_circuit])
+    return circuit, register_boundaries
 
-    def split_into_registers(key, boundaries):
-        return ' '.join([key[b[0]:b[1]] for b in boundaries])
 
-    raw_result_data = job.result()[0].data.measure.get_counts()
+def split_into_registers(key, boundaries):
+    """
+    Parameters:
+        - key is a bitstring that resembles a measurement result.
+        - boundaries is a list of intervals that partitions key
+          into smaller parts corresponding to quantum registers.
+    Returns key but splitted by a whitespace along the interval borders of boundaries.
+    """
+    return ' '.join([key[b[0]:b[1]] for b in boundaries])
+
+
+def run_circuit_and_measure_registers(circuit, registers, sampler=None, backend=None):
+    """
+    Parameters:
+        - circuit is the quantum circuit which we want to run.
+        - registers are the quantum registers, which we would like to measure.
+        - sampler is a SamplerV2 object used for running the circuit via the Primitives V2 API. See
+          https://docs.quantum.ibm.com/api/qiskit/primitives for details. This is needed if you want
+          to execute quantum circuits on IBM hardware.
+        - backend is a Qiskit Backend object used for running the circuit via the backend.run API.
+          See https://docs.quantum.ibm.com/api/qiskit/providers for details. In principle, the
+          backend.run API is deprecated but some non-IBM providers have not migrated yet. Use this
+          if you want to execute quantum circuits on e.g. IonQ hardware.
+    Runs circuit either via Primitives V2 API or backend.run API. Expects either sampler to be 
+    present or backend, but not both. The measurement results are returned as a counts dict where 
+    registers are separated via whitespaces. Registers in the result are arranged in the order they 
+    are given in in the registers parameter.
+    """
+    circuit_with_measurements, register_boundaries = add_measurements_to_circuit(circuit, registers)
+
+    use_primitives_v2_api = sampler and (not backend)
+    if use_primitives_v2_api:
+        backend = sampler.backend()
+        log.info('Running circuit on backend %s', backend.name)
+        transpiled_circuit = remove_barriers_and_transpile_for_backend(
+            circuit_with_measurements, backend
+        )
+        job = sampler.run([transpiled_circuit])
+        raw_result_data = job.result()[0].data.measure.get_counts()
+    else:
+        log.info('Running circuit on backend %s', backend.name)
+        transpiled_circuit = remove_barriers_and_transpile_for_backend(
+            circuit_with_measurements, backend
+        )
+        raw_result_data = backend.run([transpiled_circuit]).result().get_counts()
+
     return dict((split_into_registers(key, register_boundaries),raw_result_data[key])
-            for key in raw_result_data.keys())
+        for key in raw_result_data.keys())

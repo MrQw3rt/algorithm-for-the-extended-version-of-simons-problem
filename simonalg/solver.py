@@ -18,27 +18,36 @@ class SimonSolver:
     Contains implementations for Theorem 4 and Theorem 5 of 
     https://ieeexplore.ieee.org/abstract/document/595153.
     """
-    def __init__(self, simon_circuit, sampler, validate_new_elements=True):
+    def __init__(self, simon_circuit, sampler=None, backend=None, validate_new_elements=True):
         """
         Parameters:
             - simon_circuit an instance of the SimonCircuit class.
-            - sampler is a wrapper around the Qiskit backend to run circuits on. Have a look at
-              https://docs.quantum.ibm.com/api/qiskit-ibm-runtime/sampler-v2 for more details.
+            - sampler is a SamplerV2 object used for running the circuit via the Primitives V2 API. 
+              See https://docs.quantum.ibm.com/api/qiskit/primitives for details. This is needed 
+              if you want to execute quantum circuits on IBM hardware.
+            - backend is a Qiskit Backend object used for running the circuit via the backend.run
+              API. See https://docs.quantum.ibm.com/api/qiskit/providers for details. In principle, 
+              the backend.run API is deprecated but some non-IBM providers have not migrated yet. 
+              Use this if you want to execute quantum circuits on e.g. IonQ hardware.
             - validate_new_elements set this to True if you want to check whether
               all bitstrings sampled by the quantum routine are linearly independent after
               each quantum circuit run. Intended to be used when testing on noisy NISQ hardware.
               If sampled vectors are not linearly independent, an exception is thrown and the
               solver aborts.
+        The solver expects either sampler of backend to be present, but not both.
         """
         self._simon_circuit = simon_circuit
         self._sampler = sampler
+        self._backend = backend
         self._n = len(simon_circuit.circuit_wrapper.input_register)
         self._zerovec = '0' * self._n
         self._validate_new_elements = validate_new_elements
 
 
     def _run_circuit(self, circuit, input_register):
-        return run_circuit_and_measure_registers(circuit, [input_register], self._sampler)
+        return run_circuit_and_measure_registers(
+            circuit, [input_register], sampler=self._sampler, backend=self._backend
+        )
 
 
     def _get_most_probable_result(self, quantum_result):

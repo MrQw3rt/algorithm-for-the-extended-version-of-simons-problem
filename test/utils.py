@@ -49,7 +49,7 @@ def log_statevectors(result, input_register, output_register):
 
 def run_circuit_on_simulator(circuit, measured_registers):
     sampler = SamplerV2(AerSimulator())
-    return run_circuit_and_measure_registers(circuit, measured_registers, sampler)
+    return run_circuit_and_measure_registers(circuit, measured_registers, sampler=sampler)
 
 
 def run_circuit_without_measurement(circuit):
