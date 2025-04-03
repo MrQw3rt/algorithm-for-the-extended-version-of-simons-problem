@@ -55,7 +55,7 @@ from simonalg.solver import SimonSolver
 hidden_subgroup = ['000', '001', '010', '011']
 oracle = DefaultOracle(hidden_subgroup)
 
-solver = SimonSolver(SimonCircuit(oracle),  SamplerV2(AerSimulator()))
+solver = SimonSolver(SimonCircuit(oracle), sampler=SamplerV2(AerSimulator()))
 hidden_subgroup_basis = solver.solve()
 ```
 * The `hidden_subgroup` is given as a list of bitstrings. It is assumed that **all** bitstrings that make up the hidden subgroup are contained in the list. Use the `expand_group` method from the `simonalg.utils.grouptheory` module if you only want to specify a generating set.
@@ -127,7 +127,7 @@ From start to finish, the workflow for solving the extended version of Simon's p
   Note that in case our oracle would need additional qubits, we would use the `custom_output_register_size` and `custom_ancilla_register_size` parameters from the `SimonCircuit` constructor here!
 * Last, we wrap everything in a `SimonSolver` object.
     ```python
-    solver = SimonSolver(simon_circuit, AerSimulator())
+    solver = SimonSolver(simon_circuit, sampler=SamplerV2(AerSimulator()))
     ```
     At this step, we could also use any other Qiskit backend than `AerSimulator`!
 
