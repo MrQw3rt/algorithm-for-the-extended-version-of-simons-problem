@@ -71,7 +71,7 @@ You can experiment with different hidden subgroups. You can of course also use Q
 The folder `examples` contains several example scripts you can use as inspiration for your own experiments. To run an example from the project root folder run
 ```shell
 (.venv) $ export PYTHONPATH=$(pwd)
-(.venv) $ python3 examples/example_aer_simulator
+(.venv) $ python3 examples/example_aer_simulator.py
 ```
 Note that for `example_ibm_sherbrooke.py` and for `example_ionq_aria_simulator.py` you need to configure an IBM Quantum or IonQ Cloud API key respectively.
 
