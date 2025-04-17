@@ -1,5 +1,7 @@
 # Algorithm for Extended Version of Simon's Problem
 
+[![DOI](https://zenodo.org/badge/751298402.svg)](https://doi.org/10.5281/zenodo.15235735)
+
 ## Setup
 
 ### Using a Virtual Environment (Recommended)
