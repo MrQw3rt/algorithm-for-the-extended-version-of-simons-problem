@@ -83,7 +83,7 @@ Note that for `example_ibm_sherbrooke.py` and for `example_ionq_aria_simulator.p
 
 ### Circuit Wrapper
 
-This class keeps track of all the needed quantum registers. Let $H \subseteq G = \{0,1\}^n$ and let $\rho$ with $\rho : \{0,1\}^n \rightarrow \{0,1\}^m$ be a function fulfilling the promise from the extended version of Simon's problem. Then we use four quantum registers in total:
+This class keeps track of all the needed quantum registers. Let $H \subseteq G = \lbrace 0,1 \rbrace^n$ and let $\rho$ with $\rho : \lbrace0,1\rbrace^n \rightarrow \lbrace0,1\rbrace^m$ be a function fulfilling the promise from the extended version of Simon's problem. Then we use four quantum registers in total:
 * `input_register` holds the input values for $\rho$ and is always of size $n$.
 * `output_register` holds the output values for $\rho$. For $H$, there are $|G| / |H|$ cosets of $H$ in $G$. We can assign each coset a number in the range from $|G| / |H|$ and we can express $|G| / |H|$ numbers in binary notation using only $log_2(|G|/|H|)$ qubits, which is the default register size of the output_register. Should you want to program an oracle by yourself which needs more output qubits than this default number (e.g. the [CosetRepresentativeOracle](./simonalg/oracle.py)), use the `custom_output_register_size` parameter from the `CircuitWrapper` constructor.
 * `blockingcause_register` is needed for the internal workings of the algorithm for the extended version of Simon's problem. While not intended, you can use this register as ancilla qubits for you custom oracle implementation, but you **must** reset **all** used qubits back to |0> after you used them.
@@ -116,7 +116,7 @@ You need to make sure that the `circuit_wrapper` has sufficient qubits for the o
 
 From start to finish, the workflow for solving the extended version of Simon's problem for your own custom oracle is as follows:
 
-* Come up with an oracle. For example, we might pick $n = 3$ and $H = \{000, 001, 100, 101\}$. We easily calculate that the cosets of $H$ are $\{000, 001, 100, 101\}$ and $\{010, 011, 110, 111\}$. We realize that none of the bitstrings in the first coset have a $1$ at the middle qubit, but all of the bitstrings in the second coset do. Hence, it is enough to have one output qubit (which corresponds to default) and to perform a CNOT operation with the middle qubit in the input register as control and the single output qubit as target. The implementation would look something like this:
+* Come up with an oracle. For example, we might pick $n = 3$ and $H = \lbrace000, 001, 100, 101\rbrace$. We easily calculate that the cosets of $H$ are $\lbrace000, 001, 100, 101\rbrace$ and $\lbrace010, 011, 110, 111\rbrace$. We realize that none of the bitstrings in the first coset have a $1$ at the middle qubit, but all of the bitstrings in the second coset do. Hence, it is enough to have one output qubit (which corresponds to default) and to perform a CNOT operation with the middle qubit in the input register as control and the single output qubit as target. The implementation would look something like this:
     ```python
     class SimpleOracle:
         def __init__(self, hidden_subgroup):
