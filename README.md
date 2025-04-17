@@ -39,6 +39,8 @@ You can also run the entire test suite via the command
 ```
 Depending on your hardware, executing the entire test suite can take a couple of minutes.
 
+**Note**: You might get a lot of Qiskit transpiler deprecation warnings. This is a [Qiskit bug](https://github.com/Qiskit/qiskit-ibm-runtime/issues/2091) fixed in Qiskit 2.0 and can safely be ignored.
+
 
 ## Quickstart
 
